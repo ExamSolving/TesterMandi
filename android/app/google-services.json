@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1098028238157",
+    "project_id": "testermandi",
+    "storage_bucket": "testermandi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1098028238157:android:1d5a33dc5e257055c2e304",
+        "android_client_info": {
+          "package_name": "com.appvora.testermandi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1098028238157-o1icvdgo9a26hf0090clhvn28h7cplfv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.appvora.testermandi",
+            "certificate_hash": "4af51b26670af808f36b5709c4eea81941f1c4ab"
+          }
+        },
+        {
+          "client_id": "1098028238157-qli99gv3fkqs1s9cegjfj80l13dteb26.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuKfcJHhoT44B-HwV1MFiu3-_G6tFYrls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1098028238157-qli99gv3fkqs1s9cegjfj80l13dteb26.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1098028238157-u5jq2an6dshlke87jrh3s09juijueioh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.appvora.testermandi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

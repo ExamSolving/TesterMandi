@@ -1,0 +1,18 @@
+import '../entities/app_listing.dart';
+
+abstract class AppsRepository {
+  Future<void> postApp(AppListing app);
+  Future<List<AppListing>> fetchAllApps();
+  Future<List<AppListing>> fetchUserApps(String userId);
+  Future<AppListing?> fetchAppById(String appId);
+  Future<bool> packageExists(String packageName);
+
+  Stream<List<AppListing>> watchAllApps();
+  Stream<List<AppListing>> watchUserApps(String userId);
+
+  Future<void> notifyNewAppListed({
+    required String appId,
+    required String appName,
+    required String ownerName,
+  });
+}
