@@ -34,6 +34,7 @@ class AppsController extends GetxController {
   final selectedCategory = Rx<AppCategory?>(null);
   final browseSearch = ''.obs;
   final browseFilterCountry = Rx<String?>(null);
+  final browseFilterLanguage = Rx<String?>(null);
 
   // ── Multi-step form ────────────────────────────────────────────────────────
   /// 0 = Package  |  1 = Details  |  2 = Submit
@@ -305,6 +306,11 @@ class AppsController extends GetxController {
           .toList();
     }
 
+    final lang = browseFilterLanguage.value;
+    if (lang != null) {
+      list = list.where((a) => a.appLanguages.contains(lang)).toList();
+    }
+
     final q = browseSearch.value.trim().toLowerCase();
     if (q.isNotEmpty) {
       list = list
@@ -322,13 +328,17 @@ class AppsController extends GetxController {
     int n = 0;
     if (selectedCategory.value != null) n++;
     if (browseFilterCountry.value != null) n++;
+    if (browseFilterLanguage.value != null) n++;
     return n;
   }
 
   void clearBrowseFilters() {
     selectedCategory.value = null;
     browseFilterCountry.value = null;
+    browseFilterLanguage.value = null;
   }
+
+  void filterByLanguage(String? lang) => browseFilterLanguage.value = lang;
 
   @override
   void onInit() {

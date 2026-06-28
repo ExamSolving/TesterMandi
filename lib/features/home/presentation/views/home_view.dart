@@ -1903,6 +1903,104 @@ class _BrowseTile extends StatelessWidget {
                 ),
               ),
             ],
+
+            // ── Install + Join Group row ─────────────────────────────────
+            Divider(
+              height: 1,
+              color: isDark ? AppColors.borderDark : AppColors.dividerLight,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  // Install — always shown; opens Play Store listing
+                  Expanded(
+                    child: SizedBox(
+                      height: 34,
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          final uri = Uri.parse(
+                            'https://play.google.com/store/apps/details?id=${app.packageName}',
+                          );
+                          if (await canLaunchUrl(uri)) {
+                            launchUrl(uri, mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.install_mobile_rounded,
+                          size: 14,
+                        ),
+                        label: const Text(
+                          'Install',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF059669),
+                          side: const BorderSide(color: Color(0xFF059669)),
+                          backgroundColor:
+                              const Color(0xFF059669).withValues(alpha: 0.08),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 10),
+                          minimumSize: const Size(0, 34),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Join Group — only when the owner provided a group link
+                  if (app.optInUrl.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: SizedBox(
+                        height: 34,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                            final uri = Uri.parse(app.optInUrl);
+                            if (await canLaunchUrl(uri)) {
+                              launchUrl(
+                                uri,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.group_add_outlined,
+                            size: 14,
+                          ),
+                          label: const Text(
+                            'Join Group',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF7C3AED),
+                            side:
+                                const BorderSide(color: Color(0xFF7C3AED)),
+                            backgroundColor: const Color(0xFF7C3AED)
+                                .withValues(alpha: 0.08),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10),
+                            minimumSize: const Size(0, 34),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -2350,10 +2448,20 @@ class _SwapRequestCard extends StatelessWidget {
 
 // ── Browse Filter Sheet ────────────────────────────────────────────────────
 
-class _BrowseFilterSheet extends StatelessWidget {
+class _BrowseFilterSheet extends StatefulWidget {
   const _BrowseFilterSheet({required this.isDark, required this.apps});
   final bool isDark;
   final AppsController apps;
+
+  @override
+  State<_BrowseFilterSheet> createState() => _BrowseFilterSheetState();
+}
+
+class _BrowseFilterSheetState extends State<_BrowseFilterSheet>
+    with SingleTickerProviderStateMixin {
+  late TabController _tab;
+  final _countrySearchCtrl = TextEditingController();
+  String _countryQuery = '';
 
   static const _countries = <String, String>{
     'US': '🇺🇸 USA',
@@ -2388,136 +2496,154 @@ class _BrowseFilterSheet extends StatelessWidget {
     'TH': '🇹🇭 Thailand',
   };
 
-  static String _catLabel(AppCategory c) {
-    switch (c) {
-      case AppCategory.games:
-        return 'Games';
-      case AppCategory.education:
-        return 'Education';
-      case AppCategory.entertainment:
-        return 'Entertainment';
-      case AppCategory.business:
-        return 'Business';
-      case AppCategory.productivity:
-        return 'Productivity';
-      case AppCategory.finance:
-        return 'Finance';
-      case AppCategory.healthFitness:
-        return 'Health & Fitness';
-      case AppCategory.lifestyle:
-        return 'Lifestyle';
-      case AppCategory.social:
-        return 'Social';
-      case AppCategory.communication:
-        return 'Communication';
-      case AppCategory.travel:
-        return 'Travel';
-      case AppCategory.shopping:
-        return 'Shopping';
-      case AppCategory.news:
-        return 'News';
-      case AppCategory.music:
-        return 'Music';
-      case AppCategory.photography:
-        return 'Photography';
-      case AppCategory.sports:
-        return 'Sports';
-      case AppCategory.food:
-        return 'Food & Drink';
-      case AppCategory.personalization:
-        return 'Personalization';
-      case AppCategory.weather:
-        return 'Weather';
-      case AppCategory.tools:
-        return 'Tools';
-      case AppCategory.other:
-        return 'Other';
-    }
+  static const _languages = [
+    'English', 'Hindi', 'Spanish', 'French', 'German', 'Portuguese',
+    'Japanese', 'Korean', 'Arabic', 'Italian', 'Russian', 'Dutch',
+    'Turkish', 'Polish', 'Swedish', 'Chinese', 'Bengali', 'Urdu',
+    'Indonesian', 'Malay', 'Thai', 'Vietnamese', 'Filipino',
+  ];
+
+  static const _catIcons = <AppCategory, IconData>{
+    AppCategory.games: Icons.sports_esports_rounded,
+    AppCategory.education: Icons.school_rounded,
+    AppCategory.entertainment: Icons.movie_rounded,
+    AppCategory.business: Icons.business_center_rounded,
+    AppCategory.productivity: Icons.bolt_rounded,
+    AppCategory.finance: Icons.account_balance_wallet_rounded,
+    AppCategory.healthFitness: Icons.fitness_center_rounded,
+    AppCategory.lifestyle: Icons.spa_rounded,
+    AppCategory.social: Icons.people_rounded,
+    AppCategory.communication: Icons.chat_bubble_rounded,
+    AppCategory.travel: Icons.flight_rounded,
+    AppCategory.shopping: Icons.shopping_bag_rounded,
+    AppCategory.news: Icons.newspaper_rounded,
+    AppCategory.music: Icons.music_note_rounded,
+    AppCategory.photography: Icons.camera_alt_rounded,
+    AppCategory.sports: Icons.sports_soccer_rounded,
+    AppCategory.food: Icons.restaurant_rounded,
+    AppCategory.personalization: Icons.palette_rounded,
+    AppCategory.weather: Icons.wb_sunny_rounded,
+    AppCategory.tools: Icons.build_rounded,
+    AppCategory.other: Icons.apps_rounded,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _tab = TabController(length: 3, vsync: this);
+    _countrySearchCtrl.addListener(
+      () => setState(() => _countryQuery = _countrySearchCtrl.text.toLowerCase()),
+    );
   }
 
   @override
+  void dispose() {
+    _tab.dispose();
+    _countrySearchCtrl.dispose();
+    super.dispose();
+  }
+
+  bool get _isDark => widget.isDark;
+  AppsController get _apps => widget.apps;
+
+  Color get _bg => _isDark ? AppColors.backgroundDark : Colors.white;
+  Color get _cardBg => _isDark ? AppColors.cardDark : const Color(0xFFF8F9FB);
+  Color get _border => _isDark ? AppColors.borderDark : const Color(0xFFE5E7EB);
+  Color get _textPrimary =>
+      _isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+  Color get _textSecondary =>
+      _isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+  Color get _hintColor =>
+      _isDark ? AppColors.textHintDark : AppColors.textHintLight;
+
+  @override
   Widget build(BuildContext context) {
-    final bg = isDark ? AppColors.backgroundDark : Colors.white;
-    final textPrimary = isDark
-        ? AppColors.textPrimaryDark
-        : AppColors.textPrimaryLight;
-    final textSecondary = isDark
-        ? AppColors.textSecondaryDark
-        : AppColors.textSecondaryLight;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final sheetHeight =
+        (MediaQuery.of(context).size.height * 0.78).clamp(420.0, 640.0);
 
     return Container(
+      height: sheetHeight + bottomInset,
       decoration: BoxDecoration(
-        color: bg,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        color: _bg,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Drag handle ──────────────────────────────────────────────
+          // ── Drag handle ───────────────────────────────────────────────
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 4),
-              width: 36,
+              margin: const EdgeInsets.only(top: 10, bottom: 6),
+              width: 38,
               height: 4,
               decoration: BoxDecoration(
-                color: isDark ? AppColors.borderDark : const Color(0xFFD1D5DB),
+                color: _border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
-          // ── Header ───────────────────────────────────────────────────
+
+          // ── Header ────────────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 16, 0),
+            padding: const EdgeInsets.fromLTRB(20, 6, 16, 0),
             child: Row(
               children: [
                 Container(
-                  width: 34,
-                  height: 34,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(11),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: const Icon(
                     Icons.tune_rounded,
-                    color: AppColors.primary,
+                    color: Colors.white,
                     size: 18,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Text(
-                  'Filters',
+                  'Filter Apps',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 19,
                     fontWeight: FontWeight.w800,
-                    color: textPrimary,
-                    letterSpacing: -0.3,
+                    color: _textPrimary,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 const Spacer(),
                 Obx(
-                  () => apps.activeBrowseFilterCount > 0
+                  () => _apps.activeBrowseFilterCount > 0
                       ? GestureDetector(
-                          onTap: apps.clearBrowseFilters,
+                          onTap: _apps.clearBrowseFilters,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
-                              vertical: 6,
+                              vertical: 7,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(
-                                0xFFDC2626,
-                              ).withValues(alpha: 0.1),
+                              color: const Color(0xFFDC2626).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFDC2626).withValues(alpha: 0.25),
+                              ),
                             ),
                             child: const Text(
                               'Clear All',
                               style: TextStyle(
                                 fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                                 color: Color(0xFFDC2626),
                               ),
                             ),
@@ -2528,123 +2654,147 @@ class _BrowseFilterSheet extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
-          // ── Category section ─────────────────────────────────────────
+          // ── Tab pills ─────────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-            child: Row(
-              children: [
-                Text(
-                  'CATEGORY',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.1,
-                    color: textSecondary,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Obx(() {
+              final catActive = _apps.selectedCategory.value != null;
+              final countryActive = _apps.browseFilterCountry.value != null;
+              final langActive = _apps.browseFilterLanguage.value != null;
+              return Container(
+                height: 42,
+                decoration: BoxDecoration(
+                  color: _isDark
+                      ? AppColors.cardDark
+                      : const Color(0xFFF1F2F6),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: TabBar(
+                  controller: _tab,
+                  dividerColor: Colors.transparent,
+                  indicator: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                    ),
+                    borderRadius: BorderRadius.circular(11),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.35),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelPadding: EdgeInsets.zero,
+                  padding: const EdgeInsets.all(4),
+                  labelStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: _textSecondary,
+                  tabs: [
+                    _buildTabLabel('Category', catActive),
+                    _buildTabLabel('Country', countryActive),
+                    _buildTabLabel('Language', langActive),
+                  ],
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 16),
+
+          // ── Tab content ───────────────────────────────────────────────
+          Expanded(
+            child: TabBarView(
+              controller: _tab,
+              children: [
+                _CategoryTab(
+                  apps: _apps,
+                  isDark: _isDark,
+                  catIcons: _catIcons,
+                  textSecondary: _textSecondary,
+                  cardBg: _cardBg,
+                  border: _border,
+                ),
+                _CountryTab(
+                  apps: _apps,
+                  isDark: _isDark,
+                  countries: _countries,
+                  searchCtrl: _countrySearchCtrl,
+                  query: _countryQuery,
+                  textPrimary: _textPrimary,
+                  textSecondary: _textSecondary,
+                  hintColor: _hintColor,
+                  cardBg: _cardBg,
+                  border: _border,
+                ),
+                _LanguageTab(
+                  apps: _apps,
+                  isDark: _isDark,
+                  languages: _languages,
+                  textSecondary: _textSecondary,
+                  cardBg: _cardBg,
+                  border: _border,
                 ),
               ],
             ),
           ),
-          SizedBox(
-            height: 40,
-            child: Obx(() {
-              final selected = apps.selectedCategory.value;
-              return ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  _FilterChip(
-                    label: 'All',
-                    isSelected: selected == null,
-                    isDark: isDark,
-                    onTap: () => apps.filterByCategory(null),
-                  ),
-                  ...AppCategory.values.map(
-                    (cat) => _FilterChip(
-                      label: _catLabel(cat),
-                      isSelected: selected == cat,
-                      isDark: isDark,
-                      onTap: () =>
-                          apps.filterByCategory(selected == cat ? null : cat),
-                    ),
-                  ),
-                ],
-              );
-            }),
-          ),
-          const SizedBox(height: 20),
 
-          // ── Country section ──────────────────────────────────────────
+          // ── Apply button ──────────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
-            child: Text(
-              'COUNTRY',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.1,
-                color: textSecondary,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 40,
-            child: Obx(() {
-              final selected = apps.browseFilterCountry.value;
-              return ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  _FilterChip(
-                    label: '🌍 All Countries',
-                    isSelected: selected == null,
-                    isDark: isDark,
-                    onTap: () => apps.filterByCountry(null),
-                  ),
-                  ..._countries.entries.map(
-                    (e) => _FilterChip(
-                      label: e.value,
-                      isSelected: selected == e.key,
-                      isDark: isDark,
-                      onTap: () => apps.filterByCountry(
-                        selected == e.key ? null : e.key,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }),
-          ),
-          const SizedBox(height: 24),
-
-          // ── Apply button ─────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.fromLTRB(20, 8, 20, bottomInset + 20),
             child: SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 52,
               child: ElevatedButton(
                 onPressed: () => Get.back(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.zero,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ).copyWith(
+                  backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                  shadowColor: WidgetStateProperty.all(Colors.transparent),
+                ),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Obx(() {
+                      final count = _apps.activeBrowseFilterCount;
+                      return Text(
+                        count > 0 ? 'Apply Filters ($count active)' : 'Apply Filters',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: 0.2,
+                        ),
+                      );
+                    }),
                   ),
                 ),
-                child: Obx(() {
-                  final count = apps.activeBrowseFilterCount;
-                  return Text(
-                    count > 0 ? 'Apply ($count active)' : 'Apply',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  );
-                }),
               ),
             ),
           ),
@@ -2652,20 +2802,107 @@ class _BrowseFilterSheet extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildTabLabel(String label, bool hasActive) {
+    return Tab(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label),
+          if (hasActive) ...[
+            const SizedBox(width: 5),
+            Container(
+              width: 7,
+              height: 7,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF59E0B),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 }
 
-// ── Reusable filter chip ───────────────────────────────────────────────────
+// ── Category tab ───────────────────────────────────────────────────────────
 
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
+class _CategoryTab extends StatelessWidget {
+  const _CategoryTab({
+    required this.apps,
+    required this.isDark,
+    required this.catIcons,
+    required this.textSecondary,
+    required this.cardBg,
+    required this.border,
+  });
+  final AppsController apps;
+  final bool isDark;
+  final Map<AppCategory, IconData> catIcons;
+  final Color textSecondary;
+  final Color cardBg;
+  final Color border;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final selected = apps.selectedCategory.value;
+      return GridView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 1.6,
+        ),
+        itemCount: AppCategory.values.length + 1,
+        itemBuilder: (_, i) {
+          if (i == 0) {
+            final isAll = selected == null;
+            return _CatCell(
+              icon: Icons.apps_rounded,
+              label: 'All',
+              isSelected: isAll,
+              isDark: isDark,
+              cardBg: cardBg,
+              border: border,
+              onTap: () => apps.filterByCategory(null),
+            );
+          }
+          final cat = AppCategory.values[i - 1];
+          return _CatCell(
+            icon: catIcons[cat] ?? Icons.apps_rounded,
+            label: cat.categoryLabel,
+            isSelected: selected == cat,
+            isDark: isDark,
+            cardBg: cardBg,
+            border: border,
+            onTap: () => apps.filterByCategory(selected == cat ? null : cat),
+          );
+        },
+      );
+    });
+  }
+}
+
+class _CatCell extends StatelessWidget {
+  const _CatCell({
+    required this.icon,
     required this.label,
     required this.isSelected,
     required this.isDark,
+    required this.cardBg,
+    required this.border,
     required this.onTap,
   });
+  final IconData icon;
   final String label;
   final bool isSelected;
   final bool isDark;
+  final Color cardBg;
+  final Color border;
   final VoidCallback onTap;
 
   @override
@@ -2674,39 +2911,392 @@ class _FilterChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary
-              : (isDark ? AppColors.cardDark : const Color(0xFFF3F4F6)),
-          borderRadius: BorderRadius.circular(10),
+              ? const Color(0xFF6366F1).withValues(alpha: 0.12)
+              : cardBg,
+          borderRadius: BorderRadius.circular(13),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : (isDark ? AppColors.borderDark : const Color(0xFFE5E7EB)),
+            color: isSelected ? const Color(0xFF6366F1) : border,
+            width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.25),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
                 ]
               : null,
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected
-                ? Colors.white
-                : (isDark
-                      ? AppColors.textSecondaryDark
-                      : AppColors.textSecondaryLight),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected
+                  ? const Color(0xFF6366F1)
+                  : (isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight:
+                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xFF6366F1)
+                    : (isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Country tab ────────────────────────────────────────────────────────────
+
+class _CountryTab extends StatelessWidget {
+  const _CountryTab({
+    required this.apps,
+    required this.isDark,
+    required this.countries,
+    required this.searchCtrl,
+    required this.query,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.hintColor,
+    required this.cardBg,
+    required this.border,
+  });
+  final AppsController apps;
+  final bool isDark;
+  final Map<String, String> countries;
+  final TextEditingController searchCtrl;
+  final String query;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color hintColor;
+  final Color cardBg;
+  final Color border;
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = query.isEmpty
+        ? countries.entries.toList()
+        : countries.entries
+            .where((e) => e.value.toLowerCase().contains(query))
+            .toList();
+
+    return Obx(() {
+      final selected = apps.browseFilterCountry.value;
+      return Column(
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: border),
+              ),
+              child: TextField(
+                controller: searchCtrl,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: textPrimary,
+                  fontWeight: FontWeight.w500,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Search country...',
+                  hintStyle: TextStyle(
+                    fontSize: 14,
+                    color: hintColor,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    size: 18,
+                    color: hintColor,
+                  ),
+                  suffixIcon: searchCtrl.text.isNotEmpty
+                      ? GestureDetector(
+                          onTap: searchCtrl.clear,
+                          child: Icon(
+                            Icons.cancel_rounded,
+                            size: 16,
+                            color: hintColor,
+                          ),
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
           ),
+
+          // Country list
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                // All countries
+                _CountryRow(
+                  flag: '🌍',
+                  name: 'All Countries',
+                  isSelected: selected == null,
+                  isDark: isDark,
+                  cardBg: cardBg,
+                  border: border,
+                  textPrimary: textPrimary,
+                  textSecondary: textSecondary,
+                  onTap: () => apps.filterByCountry(null),
+                ),
+                const SizedBox(height: 8),
+                ...filtered.map((e) {
+                  final parts = e.value.split(' ');
+                  final flag = parts.first;
+                  final name = parts.skip(1).join(' ');
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _CountryRow(
+                      flag: flag,
+                      name: name,
+                      isSelected: selected == e.key,
+                      isDark: isDark,
+                      cardBg: cardBg,
+                      border: border,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
+                      onTap: () => apps.filterByCountry(
+                        selected == e.key ? null : e.key,
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class _CountryRow extends StatelessWidget {
+  const _CountryRow({
+    required this.flag,
+    required this.name,
+    required this.isSelected,
+    required this.isDark,
+    required this.cardBg,
+    required this.border,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.onTap,
+  });
+  final String flag;
+  final String name;
+  final bool isSelected;
+  final bool isDark;
+  final Color cardBg;
+  final Color border;
+  final Color textPrimary;
+  final Color textSecondary;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF6366F1).withValues(alpha: 0.1)
+              : cardBg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF6366F1) : border,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Text(flag, style: const TextStyle(fontSize: 20)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                name,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? const Color(0xFF6366F1) : textPrimary,
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle_rounded,
+                size: 18,
+                color: Color(0xFF6366F1),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Language tab ───────────────────────────────────────────────────────────
+
+class _LanguageTab extends StatelessWidget {
+  const _LanguageTab({
+    required this.apps,
+    required this.isDark,
+    required this.languages,
+    required this.textSecondary,
+    required this.cardBg,
+    required this.border,
+  });
+  final AppsController apps;
+  final bool isDark;
+  final List<String> languages;
+  final Color textSecondary;
+  final Color cardBg;
+  final Color border;
+
+  static const _langFlags = <String, String>{
+    'English': '🇬🇧', 'Hindi': '🇮🇳', 'Spanish': '🇪🇸',
+    'French': '🇫🇷', 'German': '🇩🇪', 'Portuguese': '🇧🇷',
+    'Japanese': '🇯🇵', 'Korean': '🇰🇷', 'Arabic': '🇸🇦',
+    'Italian': '🇮🇹', 'Russian': '🇷🇺', 'Dutch': '🇳🇱',
+    'Turkish': '🇹🇷', 'Polish': '🇵🇱', 'Swedish': '🇸🇪',
+    'Chinese': '🇨🇳', 'Bengali': '🇧🇩', 'Urdu': '🇵🇰',
+    'Indonesian': '🇮🇩', 'Malay': '🇲🇾', 'Thai': '🇹🇭',
+    'Vietnamese': '🇻🇳', 'Filipino': '🇵🇭',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final selected = apps.browseFilterLanguage.value;
+      return GridView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 1.65,
+        ),
+        itemCount: languages.length + 1,
+        itemBuilder: (_, i) {
+          if (i == 0) {
+            return _LangCell(
+              flag: '🌐',
+              label: 'All',
+              isSelected: selected == null,
+              isDark: isDark,
+              cardBg: cardBg,
+              border: border,
+              onTap: () => apps.filterByLanguage(null),
+            );
+          }
+          final lang = languages[i - 1];
+          return _LangCell(
+            flag: _langFlags[lang] ?? '🌐',
+            label: lang,
+            isSelected: selected == lang,
+            isDark: isDark,
+            cardBg: cardBg,
+            border: border,
+            onTap: () => apps.filterByLanguage(selected == lang ? null : lang),
+          );
+        },
+      );
+    });
+  }
+}
+
+class _LangCell extends StatelessWidget {
+  const _LangCell({
+    required this.flag,
+    required this.label,
+    required this.isSelected,
+    required this.isDark,
+    required this.cardBg,
+    required this.border,
+    required this.onTap,
+  });
+  final String flag;
+  final String label;
+  final bool isSelected;
+  final bool isDark;
+  final Color cardBg;
+  final Color border;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF6366F1).withValues(alpha: 0.12)
+              : cardBg,
+          borderRadius: BorderRadius.circular(13),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF6366F1) : border,
+            width: isSelected ? 1.5 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(flag, style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? const Color(0xFF6366F1)
+                    : (isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight),
+              ),
+            ),
+          ],
         ),
       ),
     );
