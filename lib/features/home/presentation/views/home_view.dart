@@ -166,6 +166,7 @@ class _DashboardTab extends StatelessWidget {
     final testing = Get.find<TestingController>();
 
     return RefreshIndicator(
+      color: AppColors.primary,
       onRefresh: () async {
         final proofs = Get.find<ProofsController>();
         await Future.wait([
@@ -177,36 +178,34 @@ class _DashboardTab extends StatelessWidget {
       },
       child: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: _buildHero(auth, apps, testing, context),
-          ),
-          SliverToBoxAdapter(child: _buildQuickActions(context)),
+          SliverToBoxAdapter(child: _buildHero(auth, apps, testing)),
+          SliverToBoxAdapter(child: _buildHowItWorks()),
+          SliverToBoxAdapter(child: _buildQuickActions()),
           SliverToBoxAdapter(child: _buildSwapRequestsSection()),
-          SliverToBoxAdapter(
-            child: _buildRecentSection(apps, testing, context),
-          ),
+          SliverToBoxAdapter(child: _buildActivitySection(apps, testing)),
           const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
         ],
       ),
     );
   }
 
+  // ── Hero ──────────────────────────────────────────────────────────────────
+
   Widget _buildHero(
     AuthController auth,
     AppsController apps,
     TestingController testing,
-    BuildContext context,
   ) {
     return Container(
       decoration: BoxDecoration(
         gradient: isDark
             ? const LinearGradient(
-                colors: [Color(0xFF08071A), Color(0xFF11102B), Color(0xFF0C0E28)],
+                colors: [Color(0xFF06050F), Color(0xFF0E0D22), Color(0xFF080820)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
             : const LinearGradient(
-                colors: [Color(0xFF3730A3), Color(0xFF6D28D9), Color(0xFF4338CA)],
+                colors: [Color(0xFF312E81), Color(0xFF5B21B6), Color(0xFF3730A3)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -214,53 +213,21 @@ class _DashboardTab extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Positioned(
-            right: -50,
-            top: -40,
-            child: Container(
-              width: 230,
-              height: 230,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.04),
-              ),
-            ),
-          ),
-          Positioned(
-            left: -40,
-            bottom: 20,
-            child: Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.03),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 90,
-            bottom: 60,
-            child: Container(
-              width: 55,
-              height: 55,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
-              ),
-            ),
-          ),
+          // Decorative circles
+          Positioned(right: -60, top: -60, child: _circle(260, 0.04)),
+          Positioned(left: -30, bottom: -20, child: _circle(180, 0.03)),
+          Positioned(right: 80, bottom: 50, child: _circle(60, 0.06)),
           SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 26),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Top row: greeting + avatar
                   Obx(() {
                     final user = auth.currentUser.value;
-                    final name =
-                        user?.displayName.split(' ').first ?? '';
+                    final name = user?.displayName.split(' ').first ?? '';
                     final hour = DateTime.now().hour;
                     final greeting = hour < 12
                         ? TKeys.homeGreetingMorning.tr
@@ -268,79 +235,99 @@ class _DashboardTab extends StatelessWidget {
                         ? TKeys.homeGreetingAfternoon.tr
                         : TKeys.homeGreetingEvening.tr;
                     return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Badge pill: TesterMandi
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.18),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF34D399),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Beta Testing Exchange',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white.withValues(alpha: 0.85),
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 10),
                               Text(
                                 greeting,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white
-                                      .withValues(alpha: 0.65),
-                                  letterSpacing: 0.3,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white.withValues(alpha: 0.6),
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 3),
                               Text(
                                 name.isNotEmpty ? name : 'Welcome',
                                 style: const TextStyle(
-                                  fontSize: 30,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.w800,
                                   color: Colors.white,
                                   letterSpacing: -0.8,
                                   height: 1.1,
                                 ),
                               ),
-                              const SizedBox(height: 7),
-                              Text(
-                                'Post  ·  Test  ·  Swap  ·  Grow',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.white
-                                      .withValues(alpha: 0.5),
-                                  letterSpacing: 0.5,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 14),
                         Column(
                           children: [
                             _NotificationBell(isDark: isDark),
                             const SizedBox(height: 10),
                             GestureDetector(
-                              onTap: () => Get.find<HomeController>()
-                                  .changeTab(4),
+                              onTap: () =>
+                                  Get.find<HomeController>().changeTab(4),
                               child: Container(
-                                width: 48,
-                                height: 48,
+                                width: 46,
+                                height: 46,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFBB9FFF),
-                                      Color(0xFF818CF8),
-                                    ],
+                                    colors: [Color(0xFFBB9FFF), Color(0xFF818CF8)],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
                                       color: const Color(0xFF7C3AED)
-                                          .withValues(alpha: 0.45),
-                                      blurRadius: 18,
-                                      offset: const Offset(0, 6),
+                                          .withValues(alpha: 0.5),
+                                      blurRadius: 16,
+                                      offset: const Offset(0, 5),
                                     ),
                                   ],
                                   border: Border.all(
-                                    color: Colors.white
-                                        .withValues(alpha: 0.25),
+                                    color: Colors.white.withValues(alpha: 0.3),
                                     width: 1.5,
                                   ),
                                 ),
@@ -350,7 +337,7 @@ class _DashboardTab extends StatelessWidget {
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w800,
-                                      fontSize: 17,
+                                      fontSize: 16,
                                     ),
                                   ),
                                 ),
@@ -361,7 +348,8 @@ class _DashboardTab extends StatelessWidget {
                       ],
                     );
                   }),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 20),
+                  // Stat row
                   _buildHeroStats(apps, testing),
                 ],
               ),
@@ -372,15 +360,25 @@ class _DashboardTab extends StatelessWidget {
     );
   }
 
+  Widget _circle(double size, double opacity) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: opacity),
+        ),
+      );
+
   Widget _buildHeroStats(AppsController apps, TestingController testing) {
     return Obx(() {
       if (!apps.myAppsLoaded.value || !testing.dataLoaded.value) {
         return const _GlassStatShimmer();
       }
       final totalApps = apps.myApps.length;
-      final totalTesters =
-          apps.myApps.fold(0, (s, a) => s + a.testerCount);
-      final joined = testing.myParticipations.length;
+      final totalTesters = apps.myApps.fold(0, (s, a) => s + a.testerCount);
+      final activeTests = testing.myParticipations
+          .where((p) => p.isActive)
+          .length;
 
       return Row(
         children: [
@@ -397,14 +395,144 @@ class _DashboardTab extends StatelessWidget {
           ),
           const _GlassDivider(),
           _GlassStatTile(
-            value: '$joined',
-            label: TKeys.homeStatsJoined.tr,
+            value: '$activeTests',
+            label: 'Active Tests',
             icon: Icons.science_rounded,
           ),
         ],
       ).animate(delay: 200.ms).fade(duration: 600.ms).slideY(begin: 0.3);
     });
   }
+
+  // ── How it works strip ────────────────────────────────────────────────────
+
+  Widget _buildHowItWorks() {
+    final steps = [
+      (icon: Icons.rocket_launch_rounded, color: const Color(0xFF6366F1),
+       label: 'Post App', sub: 'List your app'),
+      (icon: Icons.swap_horiz_rounded, color: const Color(0xFF0891B2),
+       label: 'Swap & Test', sub: 'Exchange testing'),
+      (icon: Icons.verified_rounded, color: const Color(0xFF059669),
+       label: 'Submit Proof', sub: 'Screenshot proof'),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.cardDark : Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: List.generate(steps.length * 2 - 1, (i) {
+            if (i.isOdd) {
+              return Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 16,
+                      color: isDark
+                          ? AppColors.textHintDark
+                          : AppColors.textHintLight,
+                    ),
+                  ],
+                ),
+              );
+            }
+            final s = steps[i ~/ 2];
+            return Expanded(
+              flex: 3,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: s.color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(s.icon, size: 18, color: s.color),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    s.label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    s.sub,
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: isDark
+                          ? AppColors.textHintDark
+                          : AppColors.textHintLight,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }),
+        ),
+      ).animate(delay: 150.ms).fade(duration: 500.ms).slideY(begin: 0.15),
+    );
+  }
+
+  // ── Quick actions ─────────────────────────────────────────────────────────
+
+  Widget _buildQuickActions() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: _QuickActionCard(
+              title: 'Post Your App',
+              subtitle: 'Get real testers fast',
+              icon: Icons.add_circle_outline_rounded,
+              gradient: AppColors.primaryGradient,
+              shadowColor: AppColors.primaryShadow,
+              onTap: () => Get.toNamed(AppRoutes.uploadApp),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _QuickActionCard(
+              title: 'Discover Apps',
+              subtitle: 'Join & test as tester',
+              icon: Icons.explore_outlined,
+              gradient: AppColors.testerCardGradient,
+              shadowColor: AppColors.secondary.withValues(alpha: 0.25),
+              onTap: () => Get.find<HomeController>().changeTab(2),
+            ),
+          ),
+        ],
+      ).animate(delay: 250.ms).fade(duration: 500.ms).slideY(begin: 0.2),
+    );
+  }
+
+  // ── Swap requests ─────────────────────────────────────────────────────────
 
   Widget _buildSwapRequestsSection() {
     final swaps = Get.find<SwapController>();
@@ -415,42 +543,9 @@ class _DashboardTab extends StatelessWidget {
     });
   }
 
-  Widget _buildQuickActions(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: _QuickActionCard(
-              title: 'Post App',
-              subtitle: 'Get real testers fast',
-              icon: Icons.rocket_launch_rounded,
-              gradient: AppColors.primaryGradient,
-              shadowColor: AppColors.primaryShadow,
-              onTap: () => Get.toNamed(AppRoutes.uploadApp),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _QuickActionCard(
-              title: 'Browse Apps',
-              subtitle: 'Join as a tester',
-              icon: Icons.explore_rounded,
-              gradient: AppColors.testerCardGradient,
-              shadowColor: AppColors.secondary.withValues(alpha: 0.25),
-              onTap: () => Get.find<HomeController>().changeTab(2),
-            ),
-          ),
-        ],
-      ).animate(delay: 300.ms).fade(duration: 500.ms).slideY(begin: 0.2),
-    );
-  }
+  // ── Activity section ──────────────────────────────────────────────────────
 
-  Widget _buildRecentSection(
-    AppsController apps,
-    TestingController testing,
-    BuildContext context,
-  ) {
+  Widget _buildActivitySection(AppsController apps, TestingController testing) {
     return Obx(() {
       final appsReady = apps.myAppsLoaded.value;
       final testsReady = testing.dataLoaded.value;
@@ -458,25 +553,20 @@ class _DashboardTab extends StatelessWidget {
       if (!appsReady && !testsReady) {
         return Column(
           children: [
+            const SizedBox(height: 8),
             _TestTileShimmer(isDark: isDark),
             _TestTileShimmer(isDark: isDark),
           ],
         );
       }
 
-      // Only show active participations in the "need proof" sections.
-      // Deactivated ones appear in their own section with a Reactivate button.
-      // Completed / expired ones are excluded so they don't clutter the action list.
-      final myParticipations = testing.myParticipations
-          .where((p) => p.isActive)
-          .toList();
-      final deactivatedParticipations = testing.myParticipations
-          .where((p) => p.isDeactivated)
-          .toList();
-      final myTesters = testing.myAppTesters
-          .where((p) => p.isActive)
-          .toList();
-      final myApps = apps.myApps.take(3).toList();
+      final myParticipations =
+          testing.myParticipations.where((p) => p.isActive).toList();
+      final deactivatedParticipations =
+          testing.myParticipations.where((p) => p.isDeactivated).toList();
+      final myTesters =
+          testing.myAppTesters.where((p) => p.isActive).toList();
+      final myApps = apps.myApps.toList();
       final allEmpty = myApps.isEmpty &&
           myParticipations.isEmpty &&
           myTesters.isEmpty &&
@@ -484,7 +574,6 @@ class _DashboardTab extends StatelessWidget {
 
       if (allEmpty) return _EmptyDashboard(isDark: isDark);
 
-      // Populate proof day data for the compact trackers
       if (testsReady && (myParticipations.isNotEmpty || myTesters.isNotEmpty)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Get.find<ProofsController>().checkSubmittedToday([
@@ -497,15 +586,16 @@ class _DashboardTab extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Need Proof From You ──────────────────────────────────
-          if (myParticipations.isNotEmpty) ...[
-            _SectionHeader2(
-              icon: Icons.upload_rounded,
-              title: 'Need Proof From You',
-              count: myParticipations.length,
-              color: AppColors.primary,
-              isDark: isDark,
-            ),
+          // ── Tasks you need to do: Submit proof ──────────────────
+          _DashSectionHeader(
+            icon: Icons.upload_file_rounded,
+            title: 'Your Testing Tasks',
+            subtitle: 'Submit screenshot proof daily',
+            count: myParticipations.length,
+            accentColor: AppColors.primary,
+            isDark: isDark,
+          ),
+          if (myParticipations.isNotEmpty)
             SizedBox(
               height: 176,
               child: ListView.builder(
@@ -517,36 +607,31 @@ class _DashboardTab extends StatelessWidget {
                   isDark: isDark,
                 ),
               ),
-            ),
-          ] else if (testsReady) ...[
-            _SectionHeader2(
-              icon: Icons.upload_rounded,
-              title: 'Need Proof From You',
-              count: 0,
+            )
+          else if (testsReady)
+            _DashEmptyCard(
+              icon: Icons.search_rounded,
+              message: "You haven't joined any app for testing yet.",
+              cta: 'Browse Apps to Test',
+              onTap: () => Get.find<HomeController>().changeTab(2),
+              isDark: isDark,
               color: AppColors.primary,
-              isDark: isDark,
             ),
-            _EmptySection(
-              icon: Icons.assignment_outlined,
-              message: "You haven't joined any testing yet.",
-              actionLabel: 'Browse Apps',
-              onAction: () => Get.find<HomeController>().changeTab(2),
-              isDark: isDark,
-            ),
-          ],
 
+          // ── Banner ad ────────────────────────────────────────────
           const BannerAdWidget(
             placement: BannerPlacement.dashboardTab,
-            margin: EdgeInsets.fromLTRB(16, 12, 16, 0),
+            margin: EdgeInsets.fromLTRB(16, 16, 16, 0),
           ),
 
-          // ── Deactivated participations ───────────────────────────
+          // ── Deactivated: reactivate within 14 days ──────────────
           if (deactivatedParticipations.isNotEmpty) ...[
-            _SectionHeader2(
+            _DashSectionHeader(
               icon: Icons.pause_circle_outline_rounded,
-              title: 'Deactivated',
+              title: 'Paused Testing',
+              subtitle: 'Reactivate before they expire',
               count: deactivatedParticipations.length,
-              color: const Color(0xFFF59E0B),
+              accentColor: const Color(0xFFF59E0B),
               isDark: isDark,
             ),
             SizedBox(
@@ -563,15 +648,16 @@ class _DashboardTab extends StatelessWidget {
             ),
           ],
 
-          // ── Need Proof From Them ─────────────────────────────────
-          if (myTesters.isNotEmpty) ...[
-            _SectionHeader2(
-              icon: Icons.download_rounded,
-              title: 'Need Proof From Them',
-              count: myTesters.length,
-              color: const Color(0xFF6366F1),
-              isDark: isDark,
-            ),
+          // ── Testers on your apps ─────────────────────────────────
+          _DashSectionHeader(
+            icon: Icons.groups_rounded,
+            title: 'Testers on Your Apps',
+            subtitle: 'Track their progress',
+            count: myTesters.length,
+            accentColor: const Color(0xFF6366F1),
+            isDark: isDark,
+          ),
+          if (myTesters.isNotEmpty)
             SizedBox(
               height: 206,
               child: ListView.builder(
@@ -583,37 +669,207 @@ class _DashboardTab extends StatelessWidget {
                   isDark: isDark,
                 ),
               ),
-            ),
-          ] else if (testsReady && myApps.isNotEmpty) ...[
-            _SectionHeader2(
-              icon: Icons.download_rounded,
-              title: 'Need Proof From Them',
-              count: 0,
+            )
+          else if (testsReady)
+            _DashEmptyCard(
+              icon: Icons.rocket_launch_rounded,
+              message: myApps.isEmpty
+                  ? 'Post your first app to start getting testers.'
+                  : 'No active testers yet. Swap with more developers.',
+              cta: myApps.isEmpty ? 'Post App' : 'Browse Apps',
+              onTap: myApps.isEmpty
+                  ? () => Get.toNamed(AppRoutes.uploadApp)
+                  : () => Get.find<HomeController>().changeTab(2),
+              isDark: isDark,
               color: const Color(0xFF6366F1),
-              isDark: isDark,
             ),
-            _EmptySection(
-              icon: Icons.people_outline_rounded,
-              message: 'No one is testing your apps yet.',
-              actionLabel: 'Post an App',
-              onAction: () => Get.toNamed(AppRoutes.uploadApp),
-              isDark: isDark,
-            ),
-          ],
 
-          // ── Recent Posted Apps ───────────────────────────────────
-          // if (myApps.isNotEmpty) ...[
-          //   const SizedBox(height: 8),
-          //   _SectionHeader(
-          //     title: TKeys.homeRecentApps.tr,
-          //     onSeeAll: () => Get.find<HomeController>().changeTab(1),
-          //     isDark: isDark,
-          //   ),
-          //   ...myApps.map((a) => _AppTile(app: a, isDark: isDark)),
-          // ],
+          const SizedBox(height: 8),
         ],
       );
     });
+  }
+}
+
+// ── Dashboard section header ───────────────────────────────────────────────
+
+class _DashSectionHeader extends StatelessWidget {
+  const _DashSectionHeader({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.count,
+    required this.accentColor,
+    required this.isDark,
+  });
+  final IconData icon;
+  final String title, subtitle;
+  final int count;
+  final Color accentColor;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 19, color: accentColor),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark
+                        ? AppColors.textHintDark
+                        : AppColors.textHintLight,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (count > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: accentColor.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  color: accentColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Dashboard empty card ───────────────────────────────────────────────────
+
+class _DashEmptyCard extends StatelessWidget {
+  const _DashEmptyCard({
+    required this.icon,
+    required this.message,
+    required this.cta,
+    required this.onTap,
+    required this.isDark,
+    required this.color,
+  });
+  final IconData icon;
+  final String message, cta;
+  final VoidCallback onTap;
+  final bool isDark;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.borderLight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: Icon(icon, size: 20, color: color),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondaryLight,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onTap,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color, color.withValues(alpha: 0.75)],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Text(
+                cta,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -630,6 +886,7 @@ class _MyAppsTab extends StatelessWidget {
     return Scaffold(
       backgroundColor: bg,
       body: RefreshIndicator(
+        color: AppColors.primary,
         onRefresh: () async {
           await Future.wait([
             apps.refreshMyApps(),
@@ -638,171 +895,105 @@ class _MyAppsTab extends StatelessWidget {
         },
         child: CustomScrollView(
           slivers: [
-            // ── App bar ──────────────────────────────────────────
+            // ── Premium app bar ───────────────────────────────────
             SliverAppBar(
               pinned: true,
               backgroundColor: bg,
               surfaceTintColor: Colors.transparent,
               elevation: 0,
-              scrolledUnderElevation: 0.5,
+              scrolledUnderElevation: 0.4,
               automaticallyImplyLeading: false,
-              toolbarHeight: 58,
+              toolbarHeight: 64,
               titleSpacing: 0,
               title: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 4, 0),
+                padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'My Apps',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 22,
-                            letterSpacing: -0.5,
-                            color: isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimaryLight,
-                          ),
-                        ),
-                        Obx(() {
-                          final n = apps.myApps.length;
-                          return Text(
-                            n == 0
-                                ? 'No apps yet'
-                                : '$n ${n == 1 ? 'app' : 'apps'} posted',
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'My Apps',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 24,
+                              letterSpacing: -0.6,
                               color: isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondaryLight,
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight,
                             ),
-                          );
-                        }),
-                      ],
+                          ),
+                          Obx(() {
+                            final n = apps.myApps.length;
+                            return Text(
+                              n == 0
+                                  ? 'Start posting your apps'
+                                  : '$n ${n == 1 ? 'app' : 'apps'} listed for testing',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isDark
+                                    ? AppColors.textHintDark
+                                    : AppColors.textHintLight,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
                     ),
-                    // const Spacer(),
-                    // GestureDetector(
-                    //   onTap: () => Get.toNamed(AppRoutes.uploadApp),
-                    //   child: Container(
-                    //     margin: const EdgeInsets.only(right: 16),
-                    //     padding: const EdgeInsets.symmetric(
-                    //         horizontal: 14, vertical: 8),
-                    //     decoration: BoxDecoration(
-                    //       gradient: AppColors.primaryGradient,
-                    //       borderRadius: BorderRadius.circular(12),
-                    //       boxShadow: [
-                    //         BoxShadow(
-                    //           color: AppColors.primary.withValues(alpha: 0.3),
-                    //           blurRadius: 8,
-                    //           offset: const Offset(0, 3),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     child: const Row(
-                    //       mainAxisSize: MainAxisSize.min,
-                    //       children: [
-                    //         Icon(Icons.add_rounded,
-                    //             color: Colors.white, size: 16),
-                    //         SizedBox(width: 5),
-                    //         Text(
-                    //           'Post App',
-                    //           style: TextStyle(
-                    //             color: Colors.white,
-                    //             fontSize: 13,
-                    //             fontWeight: FontWeight.w700,
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
+                    GestureDetector(
+                      onTap: () => Get.toNamed(AppRoutes.uploadApp),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 9,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient,
+                          borderRadius: BorderRadius.circular(13),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.add_rounded,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                            SizedBox(width: 5),
+                            Text(
+                              'Post App',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
 
-            // ── Summary stats ────────────────────────────────────
-            Obx(() {
-              if (!apps.myAppsLoaded.value) {
-                return const SliverToBoxAdapter(child: SizedBox.shrink());
-              }
-              final list = apps.myApps;
-              if (list.isEmpty) {
-                return const SliverToBoxAdapter(child: SizedBox.shrink());
-              }
-              final totalTesters = list.fold(0, (s, a) => s + a.testerCount);
-              final active = list
-                  .where((a) => a.status == AppStatus.active)
-                  .length;
-              return SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: isDark
-                        ? LinearGradient(
-                            colors: [
-                              AppColors.primary.withValues(alpha: 0.15),
-                              AppColors.accent.withValues(alpha: 0.08),
-                            ],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          )
-                        : LinearGradient(
-                            colors: [
-                              AppColors.primary.withValues(alpha: 0.06),
-                              AppColors.accent.withValues(alpha: 0.03),
-                            ],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.15),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      _SummaryMetric(
-                        icon: Icons.apps_rounded,
-                        value: '${list.length}',
-                        label: 'Total',
-                        color: AppColors.primary,
-                        isDark: isDark,
-                      ),
-                      _SummaryDivider(isDark: isDark),
-                      _SummaryMetric(
-                        icon: Icons.check_circle_rounded,
-                        value: '$active',
-                        label: 'Active',
-                        color: const Color(0xFF059669),
-                        isDark: isDark,
-                      ),
-                      _SummaryDivider(isDark: isDark),
-                      _SummaryMetric(
-                        icon: Icons.people_rounded,
-                        value: '$totalTesters',
-                        label: 'Testers',
-                        color: const Color(0xFF7C3AED),
-                        isDark: isDark,
-                      ),
-                    ],
-                  ),
-                ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.1),
-              );
-            }),
-
-            // ── Apps list ────────────────────────────────────────
+            // ── Apps list ─────────────────────────────────────────
             Obx(() {
               if (!apps.myAppsLoaded.value) {
                 return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (_, _) => _AppTileShimmer(isDark: isDark),
@@ -826,16 +1017,16 @@ class _MyAppsTab extends StatelessWidget {
                 );
               }
               return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (ctx, i) => _AppTile(app: list[i], isDark: isDark)
-                        .animate(delay: Duration(milliseconds: 60 * i))
-                        .fadeIn(duration: 280.ms)
+                        .animate(delay: Duration(milliseconds: 55 * i))
+                        .fadeIn(duration: 300.ms)
                         .slideY(
-                          begin: 0.06,
+                          begin: 0.08,
                           end: 0,
-                          duration: 280.ms,
+                          duration: 300.ms,
                           curve: Curves.easeOut,
                         ),
                     childCount: list.length,
@@ -1211,77 +1402,6 @@ class _ProfileTab extends StatelessWidget {
 
 // ── My Apps summary widgets ────────────────────────────────────────────────
 
-class _SummaryMetric extends StatelessWidget {
-  const _SummaryMetric({
-    required this.icon,
-    required this.value,
-    required this.label,
-    required this.color,
-    required this.isDark,
-  });
-  final IconData icon;
-  final String value;
-  final String label;
-  final Color color;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 17),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: isDark
-                  ? AppColors.textPrimaryDark
-                  : AppColors.textPrimaryLight,
-              letterSpacing: -0.5,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SummaryDivider extends StatelessWidget {
-  const _SummaryDivider({required this.isDark});
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 1,
-    height: 44,
-    color: (isDark ? AppColors.borderDark : AppColors.borderLight).withValues(
-      alpha: 0.7,
-    ),
-  );
-}
-
 // ── Shared Tiles ───────────────────────────────────────────────────────────
 
 class _AppTile extends StatelessWidget {
@@ -1291,34 +1411,25 @@ class _AppTile extends StatelessWidget {
 
   Color get _statusColor {
     switch (app.status) {
-      case AppStatus.active:
-        return const Color(0xFF059669);
-      case AppStatus.full:
-        return AppColors.primary;
-      case AppStatus.expired:
-        return const Color(0xFFDC2626);
+      case AppStatus.active:  return const Color(0xFF059669);
+      case AppStatus.full:    return const Color(0xFF6366F1);
+      case AppStatus.expired: return const Color(0xFFDC2626);
+    }
+  }
+
+  List<Color> get _statusGradient {
+    switch (app.status) {
+      case AppStatus.active:  return [const Color(0xFF059669), const Color(0xFF10B981)];
+      case AppStatus.full:    return [const Color(0xFF6366F1), const Color(0xFF8B5CF6)];
+      case AppStatus.expired: return [const Color(0xFFDC2626), const Color(0xFFEF4444)];
     }
   }
 
   String get _statusLabel {
     switch (app.status) {
-      case AppStatus.active:
-        return TKeys.myAppsStatusActive.tr;
-      case AppStatus.full:
-        return TKeys.myAppsStatusCompleted.tr;
-      case AppStatus.expired:
-        return TKeys.myAppsStatusExpired.tr;
-    }
-  }
-
-  IconData get _statusIcon {
-    switch (app.status) {
-      case AppStatus.active:
-        return Icons.radio_button_checked_rounded;
-      case AppStatus.full:
-        return Icons.check_circle_rounded;
-      case AppStatus.expired:
-        return Icons.cancel_rounded;
+      case AppStatus.active:  return TKeys.myAppsStatusActive.tr;
+      case AppStatus.full:    return TKeys.myAppsStatusCompleted.tr;
+      case AppStatus.expired: return TKeys.myAppsStatusExpired.tr;
     }
   }
 
@@ -1326,238 +1437,296 @@ class _AppTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = (app.testerCount / app.testersNeeded).clamp(0.0, 1.0);
     final sc = _statusColor;
+    final sg = _statusGradient;
     final isUrgent = app.daysLeft <= 3 && app.status == AppStatus.active;
 
     return GestureDetector(
       onTap: () => Get.toNamed(AppRoutes.appDetail, arguments: app),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 14),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: isDark ? AppColors.cardDark : Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            color: isDark
+                ? AppColors.borderDark
+                : sc.withValues(alpha: 0.12),
+            width: isDark ? 1 : 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: sc.withValues(alpha: isDark ? 0.08 : 0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+              color: sc.withValues(alpha: isDark ? 0.1 : 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
             ),
             if (!isDark)
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 6,
+                blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
           ],
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ── Colored left accent strip ──────────────────────
-              Container(
-                width: 4,
-                decoration: BoxDecoration(
-                  color: sc,
-                  borderRadius: const BorderRadius.horizontal(
-                    left: Radius.circular(20),
-                  ),
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Gradient top accent bar (clipped by parent) ──────
+            Container(
+              height: 4,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: sg),
               ),
-              // ── Card content ───────────────────────────────────
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-                  child: Column(
+            ),
+
+            // ── Card body ────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Row 1: icon + name/category + status
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Top row: icon + name/category + status
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      // App icon
+                      Stack(
                         children: [
-                          // App icon with status-colored glow
                           Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: sc.withValues(alpha: 0.22),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
+                                  color: sc.withValues(alpha: 0.28),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 5),
                                 ),
                               ],
                             ),
                             child: _AppIcon(
                               iconUrl: app.iconUrl,
-                              size: 54,
-                              radius: 14,
+                              size: 60,
+                              radius: 16,
                             ),
                           ),
-                          const SizedBox(width: 13),
-                          // Name + category
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  app.appName,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 15,
-                                    color: isDark
-                                        ? AppColors.textPrimaryDark
-                                        : AppColors.textPrimaryLight,
-                                    letterSpacing: -0.3,
-                                    height: 1.2,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                          // Status dot in bottom-right corner of icon
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              width: 14,
+                              height: 14,
+                              decoration: BoxDecoration(
+                                color: sc,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isDark
+                                      ? AppColors.cardDark
+                                      : Colors.white,
+                                  width: 2,
                                 ),
-                                const SizedBox(height: 4),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 14),
+                      // Name + category + package
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              app.appName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16,
+                                color: isDark
+                                    ? AppColors.textPrimaryDark
+                                    : AppColors.textPrimaryLight,
+                                letterSpacing: -0.4,
+                                height: 1.15,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              children: [
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 8,
                                     vertical: 3,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(
-                                      alpha: 0.08,
+                                    gradient: LinearGradient(
+                                      colors: sg.map((c) =>
+                                          c.withValues(alpha: 0.14)).toList(),
                                     ),
-                                    borderRadius: BorderRadius.circular(6),
+                                    borderRadius: BorderRadius.circular(7),
                                   ),
                                   child: Text(
                                     app.categoryLabel,
                                     style: TextStyle(
                                       fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark
-                                          ? AppColors.primaryLight
-                                          : AppColors.primary,
+                                      fontWeight: FontWeight.w700,
+                                      color: sc,
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Status pill
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 9,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: sc.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: sc.withValues(alpha: 0.25),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(_statusIcon, size: 10, color: sc),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _statusLabel,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: sc,
-                                    letterSpacing: 0.1,
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    app.packageName,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isDark
+                                          ? AppColors.textHintDark
+                                          : AppColors.textHintLight,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-
-                      // Progress label row
-                      Row(
-                        children: [
-                          Text(
-                            '${app.testerCount} of ${app.testersNeeded} testers',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondaryLight,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            '${(progress * 100).round()}%',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: sc,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Progress bar
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 7,
-                          backgroundColor: sc.withValues(
-                            alpha: isDark ? 0.12 : 0.1,
-                          ),
-                          valueColor: AlwaysStoppedAnimation(sc),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-
-                      // Bottom stats row
-                      Row(
-                        children: [
-                          _InfoChip(
-                            icon: Icons.schedule_rounded,
-                            label: isUrgent
-                                ? '${app.daysLeft}d left!'
-                                : '${app.daysLeft}d left',
-                            color: isUrgent
-                                ? const Color(0xFFDC2626)
-                                : (isDark
-                                      ? AppColors.textHintDark
-                                      : AppColors.textHintLight),
-                            isDark: isDark,
-                            highlight: isUrgent,
+                      const SizedBox(width: 8),
+                      // Status pill
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: sg.map((c) =>
+                                c.withValues(alpha: 0.14)).toList(),
                           ),
-                          const SizedBox(width: 8),
-                          _InfoChip(
-                            icon: Icons.people_outline_rounded,
-                            label:
-                                '${app.testerCount} tester${app.testerCount == 1 ? '' : 's'}',
-                            color: isDark
-                                ? AppColors.textHintDark
-                                : AppColors.textHintLight,
-                            isDark: isDark,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          _statusLabel,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: sc,
+                            letterSpacing: 0.1,
                           ),
-                          const Spacer(),
-                          Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 12,
-                            color: isDark
-                                ? AppColors.textHintDark
-                                : AppColors.textHintLight,
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 18),
+
+                  // Row 2: progress header
+                  Row(
+                    children: [
+                      Text(
+                        '${app.testerCount} / ${app.testersNeeded} testers',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                      const Spacer(),
+                      Text(
+                        '${(progress * 100).round()}%',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: sc,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 7),
+
+                  // Gradient progress bar
+                  Stack(
+                    children: [
+                      Container(
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: sc.withValues(alpha: isDark ? 0.12 : 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      FractionallySizedBox(
+                        widthFactor: progress,
+                        child: Container(
+                          height: 8,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(colors: sg),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: sc.withValues(alpha: 0.4),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Row 3: meta chips + arrow
+                  Row(
+                    children: [
+                      _InfoChip(
+                        icon: Icons.schedule_rounded,
+                        label: isUrgent
+                            ? '${app.daysLeft}d left!'
+                            : '${app.daysLeft} days left',
+                        color: isUrgent
+                            ? const Color(0xFFDC2626)
+                            : (isDark
+                                  ? AppColors.textHintDark
+                                  : AppColors.textHintLight),
+                        isDark: isDark,
+                        highlight: isUrgent,
+                      ),
+                      const SizedBox(width: 8),
+                      _InfoChip(
+                        icon: Icons.people_outline_rounded,
+                        label:
+                            '${app.testerCount} tester${app.testerCount == 1 ? '' : 's'}',
+                        color: isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHintLight,
+                        isDark: isDark,
+                      ),
+                      const Spacer(),
+                      Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: sg.map((c) =>
+                                c.withValues(alpha: 0.12)).toList(),
+                          ),
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 14,
+                          color: sc,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -2003,163 +2172,6 @@ class _BrowseTile extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ── Section header for My Tests ────────────────────────────────────────────
-
-class _SectionHeader2 extends StatelessWidget {
-  const _SectionHeader2({
-    required this.icon,
-    required this.title,
-    required this.count,
-    required this.color,
-    required this.isDark,
-  });
-  final IconData icon;
-  final String title;
-  final int count;
-  final Color color;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
-      child: Row(
-        children: [
-          // Left accent bar
-          Container(
-            width: 4,
-            height: 22,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [color, color.withValues(alpha: 0.5)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
-                letterSpacing: -0.3,
-              ),
-            ),
-          ),
-          if (count > 0)
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [color, color.withValues(alpha: 0.75)],
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.3),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                '$count',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Empty section placeholder ──────────────────────────────────────────────
-
-class _EmptySection extends StatelessWidget {
-  const _EmptySection({
-    required this.icon,
-    required this.message,
-    required this.actionLabel,
-    required this.onAction,
-    required this.isDark,
-  });
-  final IconData icon;
-  final String message;
-  final String actionLabel;
-  final VoidCallback onAction;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 18, color: AppColors.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                fontSize: 13,
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: onAction,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                actionLabel,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
