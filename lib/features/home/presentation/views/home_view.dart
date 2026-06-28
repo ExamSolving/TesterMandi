@@ -5599,83 +5599,241 @@ class _CompactCardShimmer extends StatelessWidget {
 
 // ── Chat Tab ───────────────────────────────────────────────────────────────
 
-class _ChatTab extends StatelessWidget {
+class _ChatTab extends StatefulWidget {
   const _ChatTab({required this.isDark});
   final bool isDark;
 
   @override
+  State<_ChatTab> createState() => _ChatTabState();
+}
+
+class _ChatTabState extends State<_ChatTab> {
+  final _searchCtrl = TextEditingController();
+  String _query = '';
+
+  bool get _isDark => widget.isDark;
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final chat = Get.find<ChatController>();
-    final bg = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
+    final bg = _isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
 
     return Scaffold(
       backgroundColor: bg,
       body: CustomScrollView(
         slivers: [
+          // ── Premium App Bar ───────────────────────────────────
           SliverAppBar(
             pinned: true,
             backgroundColor: bg,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0.4,
             automaticallyImplyLeading: false,
-            title: Text(
-              TKeys.navChat.tr,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
-              ),
-            ),
-            actions: [
-              Obx(() {
-                final unread = chat.totalUnread;
-                if (unread == 0) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      '$unread unread',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
+            toolbarHeight: 64,
+            titleSpacing: 0,
+            title: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Messages',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 24,
+                            letterSpacing: -0.6,
+                            color: _isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
+                          ),
+                        ),
+                        Obx(() {
+                          final n = chat.rooms.length;
+                          return Text(
+                            n == 0
+                                ? 'No swap conversations yet'
+                                : '$n swap conversation${n == 1 ? '' : 's'}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _isDark
+                                  ? AppColors.textHintDark
+                                  : AppColors.textHintLight,
+                            ),
+                          );
+                        }),
+                      ],
                     ),
                   ),
-                );
-              }),
-            ],
+                  // Unread badge
+                  Obx(() {
+                    final unread = chat.totalUnread;
+                    if (unread == 0) return const SizedBox.shrink();
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        '$unread new',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+            // ── Search bar ───────────────────────────────────────
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(58),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Container(
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: _isDark ? AppColors.cardDark : Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: _isDark
+                          ? AppColors.borderDark
+                          : AppColors.borderLight,
+                    ),
+                    boxShadow: _isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                  ),
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: (v) => setState(() => _query = v.toLowerCase()),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Search by name or app…',
+                      hintStyle: TextStyle(
+                        fontSize: 13,
+                        color: _isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHintLight,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search_rounded,
+                        size: 20,
+                        color: _isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHintLight,
+                      ),
+                      suffixIcon: _query.isNotEmpty
+                          ? GestureDetector(
+                              onTap: () {
+                                _searchCtrl.clear();
+                                setState(() => _query = '');
+                              },
+                              child: Icon(
+                                Icons.cancel_rounded,
+                                size: 17,
+                                color: _isDark
+                                    ? AppColors.textHintDark
+                                    : AppColors.textHintLight,
+                              ),
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 12),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
+
+          // ── Room list ─────────────────────────────────────────
           Obx(() {
             if (!chat.roomsLoaded.value) {
               return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (_, _) => _ChatRoomShimmer(isDark: isDark),
+                    (_, _) => _ChatRoomShimmer(isDark: _isDark),
                     childCount: 5,
                   ),
                 ),
               );
             }
-            final rooms = chat.rooms;
+
+            final myUid =
+                Get.find<AuthController>().currentUser.value?.uid ?? '';
+            final all = chat.rooms;
+            final rooms = _query.isEmpty
+                ? all
+                : all.where((r) {
+                    final name =
+                        r.otherUserName(myUid).toLowerCase();
+                    final apps =
+                        '${r.fromAppName} ${r.toAppName}'.toLowerCase();
+                    return name.contains(_query) || apps.contains(_query);
+                  }).toList();
+
+            if (all.isEmpty) {
+              return SliverFillRemaining(
+                child: _EmptyChatRooms(isDark: _isDark),
+              );
+            }
             if (rooms.isEmpty) {
               return SliverFillRemaining(
-                child: _EmptyChatRooms(isDark: isDark),
+                child: _NoSearchResults(
+                  query: _query,
+                  isDark: _isDark,
+                  onClear: () {
+                    _searchCtrl.clear();
+                    setState(() => _query = '');
+                  },
+                ),
               );
             }
             return SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 100),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => _ChatRoomTile(room: rooms[i], isDark: isDark),
+                  (ctx, i) => _ChatRoomTile(room: rooms[i], isDark: _isDark)
+                      .animate(delay: Duration(milliseconds: 40 * i))
+                      .fadeIn(duration: 280.ms)
+                      .slideY(begin: 0.05, duration: 280.ms),
                   childCount: rooms.length,
                 ),
               ),
@@ -5694,172 +5852,375 @@ class _ChatRoomTile extends StatelessWidget {
   final ChatRoom room;
   final bool isDark;
 
+  // Deterministic gradient per user initial
+  static const _avatarGradients = [
+    [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+    [Color(0xFF0891B2), Color(0xFF06B6D4)],
+    [Color(0xFF059669), Color(0xFF10B981)],
+    [Color(0xFFDC2626), Color(0xFFEF4444)],
+    [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+    [Color(0xFFDB2777), Color(0xFFEC4899)],
+    [Color(0xFF7C3AED), Color(0xFF9333EA)],
+  ];
+
+  List<Color> _gradientFor(String name) {
+    final idx = name.isEmpty ? 0 : name.codeUnitAt(0) % _avatarGradients.length;
+    return _avatarGradients[idx];
+  }
+
+  String _timeLabel(DateTime? at) {
+    if (at == null) return '';
+    final diff = DateTime.now().difference(at);
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+    if (diff.inHours < 24) return '${diff.inHours}h ago';
+    if (diff.inDays == 1) return 'Yesterday';
+    return '${diff.inDays}d ago';
+  }
+
   @override
   Widget build(BuildContext context) {
     final chat = Get.find<ChatController>();
     final myUid = Get.find<AuthController>().currentUser.value?.uid ?? '';
     final otherName = room.otherUserName(myUid);
-    final initials = otherName.isNotEmpty ? otherName[0].toUpperCase() : '?';
+    final initials = otherName.isNotEmpty
+        ? otherName.trim().split(' ').take(2).map((w) => w[0]).join().toUpperCase()
+        : '?';
     final unread = room.myUnread(myUid);
-
-    String timeLabel = '';
-    if (room.lastMessageAt != null) {
-      final diff = DateTime.now().difference(room.lastMessageAt!);
-      if (diff.inMinutes < 1) {
-        timeLabel = 'Just now';
-      } else if (diff.inHours < 1) {
-        timeLabel = '${diff.inMinutes}m';
-      } else if (diff.inDays < 1) {
-        timeLabel = '${diff.inHours}h';
-      } else {
-        timeLabel = '${diff.inDays}d';
-      }
-    }
+    final hasUnread = unread > 0;
+    final grad = _gradientFor(otherName);
+    final isSentByMe = room.lastMessageSenderId == myUid;
+    final timeLabel = _timeLabel(room.lastMessageAt);
 
     return GestureDetector(
       onTap: () => chat.openChat(room),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: isDark ? AppColors.cardDark : Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: unread > 0
-                ? AppColors.primary.withValues(alpha: 0.4)
+            color: hasUnread
+                ? AppColors.primary.withValues(alpha: 0.35)
                 : (isDark ? AppColors.borderDark : AppColors.borderLight),
+            width: hasUnread ? 1.5 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+              color: hasUnread
+                  ? AppColors.primary.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: isDark ? 0.12 : 0.04),
+              blurRadius: hasUnread ? 16 : 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Row(
-          children: [
-            // Avatar
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                gradient: AppColors.accentGradient,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Avatar with unread dot ──────────────────────────
+              Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          otherName,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimaryLight,
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: grad,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: grad.first.withValues(alpha: 0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        initials,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (hasUnread)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          gradient: AppColors.primaryGradient,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isDark ? AppColors.cardDark : Colors.white,
+                            width: 2,
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            unread > 9 ? '9+' : '$unread',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
                       ),
-                      if (timeLabel.isNotEmpty)
-                        Text(
-                          timeLabel,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: unread > 0
-                                ? AppColors.primary
-                                : (isDark
-                                      ? AppColors.textHintDark
-                                      : AppColors.textHintLight),
-                            fontWeight: unread > 0
-                                ? FontWeight.w600
-                                : FontWeight.w400,
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${room.fromAppName} ↔ ${room.toAppName}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isDark
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (room.lastMessage != null) ...[
-                    const SizedBox(height: 3),
+                ],
+              ),
+              const SizedBox(width: 13),
+
+              // ── Content ─────────────────────────────────────────
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Name + time
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Expanded(
                           child: Text(
-                            room.lastMessage!,
+                            otherName,
                             style: TextStyle(
-                              fontSize: 12,
-                              color: unread > 0
-                                  ? (isDark
-                                        ? AppColors.textPrimaryDark
-                                        : AppColors.textPrimaryLight)
-                                  : (isDark
-                                        ? AppColors.textHintDark
-                                        : AppColors.textHintLight),
-                              fontWeight: unread > 0
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                              fontSize: 15,
+                              fontWeight: hasUnread
+                                  ? FontWeight.w800
+                                  : FontWeight.w700,
+                              color: isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight,
+                              letterSpacing: -0.2,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (unread > 0)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '$unread',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                              ),
+                        if (timeLabel.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          Text(
+                            timeLabel,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: hasUnread
+                                  ? AppColors.primary
+                                  : (isDark
+                                        ? AppColors.textHintDark
+                                        : AppColors.textHintLight),
+                              fontWeight: hasUnread
+                                  ? FontWeight.w700
+                                  : FontWeight.w400,
                             ),
                           ),
+                        ],
                       ],
                     ),
+                    const SizedBox(height: 5),
+
+                    // Swap pair pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.primary.withValues(alpha: 0.12)
+                            : AppColors.primary.withValues(alpha: 0.07),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.swap_horiz_rounded,
+                            size: 12,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              '${room.fromAppName}  ↔  ${room.toAppName}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? AppColors.primaryLight
+                                    : AppColors.primary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Last message
+                    if (room.lastMessage != null) ...[
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          // "You:" label when sent by me
+                          if (isSentByMe)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: Text(
+                                'You:',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark
+                                      ? AppColors.textHintDark
+                                      : AppColors.textHintLight,
+                                ),
+                              ),
+                            ),
+                          Expanded(
+                            child: Text(
+                              room.lastMessage!,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: hasUnread
+                                    ? (isDark
+                                          ? AppColors.textPrimaryDark
+                                          : AppColors.textPrimaryLight)
+                                    : (isDark
+                                          ? AppColors.textHintDark
+                                          : AppColors.textHintLight),
+                                fontWeight: hasUnread
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Say hello — start the conversation!',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          color: isDark
+                              ? AppColors.textHintDark
+                              : AppColors.textHintLight,
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              // Chevron
+              Padding(
+                padding: const EdgeInsets.only(top: 14),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: isDark
+                      ? AppColors.textHintDark
+                      : AppColors.textHintLight,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── No search results ──────────────────────────────────────────────────────
+
+class _NoSearchResults extends StatelessWidget {
+  const _NoSearchResults({
+    required this.query,
+    required this.isDark,
+    required this.onClear,
+  });
+  final String query;
+  final bool isDark;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: (isDark ? AppColors.cardDark : const Color(0xFFF3F4F6)),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.search_off_rounded,
+                size: 30,
+                color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
               ),
             ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right_rounded,
-              size: 18,
-              color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+            const SizedBox(height: 16),
+            Text(
+              'No results for "$query"',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Try searching by user name or app name.',
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondaryLight,
+              ),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: onClear,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'Clear Search',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -5878,43 +6239,113 @@ class _EmptyChatRooms extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.chat_bubble_outline_rounded,
-                color: Colors.white,
-                size: 36,
-              ),
+            // Icon stack
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.primary.withValues(alpha: 0.07),
+                  ),
+                ),
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.35),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.forum_rounded,
+                    color: Colors.white,
+                    size: 32,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Text(
-              'No chats yet',
+              'No Conversations Yet',
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
                 color: isDark
                     ? AppColors.textPrimaryDark
                     : AppColors.textPrimaryLight,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
-              'When a swap is accepted, a chat is\nautomatically created for collaboration.',
+              'Chat rooms are created automatically\nwhen a swap request is accepted.\nSwap your app with another developer\nto start collaborating!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
+                height: 1.55,
                 color: isDark
                     ? AppColors.textSecondaryDark
                     : AppColors.textSecondaryLight,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // How it works mini strip
+            Container(
+              margin: const EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.cardDark : const Color(0xFFF8F9FB),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDark ? AppColors.borderDark : AppColors.borderLight,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ChatHowStep(
+                    icon: Icons.swap_horiz_rounded,
+                    label: 'Send Swap',
+                    isDark: isDark,
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: isDark
+                        ? AppColors.textHintDark
+                        : AppColors.textHintLight,
+                    size: 16,
+                  ),
+                  _ChatHowStep(
+                    icon: Icons.check_circle_outline_rounded,
+                    label: 'Get Accepted',
+                    isDark: isDark,
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: isDark
+                        ? AppColors.textHintDark
+                        : AppColors.textHintLight,
+                    size: 16,
+                  ),
+                  _ChatHowStep(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    label: 'Chat Opens',
+                    isDark: isDark,
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -5922,11 +6353,45 @@ class _EmptyChatRooms extends StatelessWidget {
               label: 'Browse Apps to Swap',
               onPressed: () => Get.find<HomeController>().changeTab(2),
               icon: Icons.explore_rounded,
-              height: 48,
+              height: 50,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ChatHowStep extends StatelessWidget {
+  const _ChatHowStep({required this.icon, required this.label, required this.isDark});
+  final IconData icon;
+  final String label;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 17, color: AppColors.primary),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -5942,38 +6407,32 @@ class _ChatRoomShimmer extends StatelessWidget {
     return _Shimmer(
       isDark: isDark,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
+        margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isDark ? AppColors.cardDark : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? AppColors.borderDark : AppColors.borderLight,
-          ),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // avatar circle — matches gradient CircleAvatar 46×46
-            const _SBox(width: 46, height: 46, radius: 23),
-            const SizedBox(width: 12),
+            const _SBox(width: 52, height: 52, radius: 26),
+            const SizedBox(width: 13),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
-                  // name + time label row
                   Row(
                     children: [
-                      Expanded(child: _SBox(width: 120, height: 13)),
+                      Expanded(child: _SBox(height: 14)),
                       SizedBox(width: 8),
-                      _SBox(width: 28, height: 11),
+                      _SBox(width: 40, height: 11),
                     ],
                   ),
-                  SizedBox(height: 5),
-                  // "AppA ↔ AppB" row
-                  _SBox(width: 160, height: 11),
-                  SizedBox(height: 5),
-                  // last message preview
-                  _SBox(height: 11),
+                  SizedBox(height: 7),
+                  _SBox(width: 150, height: 22, radius: 8),
+                  SizedBox(height: 7),
+                  _SBox(height: 12),
                 ],
               ),
             ),
