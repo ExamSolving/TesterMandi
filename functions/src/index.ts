@@ -648,6 +648,7 @@ interface NotificationRequest {
   targetToken?: string;
   topic?: string;
   recipientId?: string;
+  excludeUserId?: string;
   title?: string;
   body?: string;
   type?: string;
@@ -664,6 +665,7 @@ export const processNotificationRequest = onDocumentCreated(
       targetToken,
       topic,
       recipientId = "",
+      excludeUserId = "",
       title,
       body,
       type = "general",
@@ -677,7 +679,36 @@ export const processNotificationRequest = onDocumentCreated(
     }
 
     try {
-      if (topic) {
+      if (excludeUserId) {
+        // Fan-out to every user except the poster — avoids notifying the owner.
+        const usersSnap = await db.collection("users").get();
+        const sends: Promise<unknown>[] = [];
+        for (const doc of usersSnap.docs) {
+          if (doc.id === excludeUserId) continue;
+          const token = doc.data().fcmToken as string | undefined;
+          if (!token || !token.trim()) continue;
+          sends.push(
+            messaging.send({
+              token,
+              notification: { title, body },
+              data: { type, recipientId: doc.id, ...data },
+              android: {
+                priority: "high",
+                notification: { channelId: ANDROID_CHANNEL, sound: "default", priority: "high" },
+              },
+              apns: {
+                headers: { "apns-priority": "10" },
+                payload: { aps: { sound: "default", badge: 1, "content-available": 1 } },
+              },
+            }).catch((err: unknown) => {
+              const code = (err as { errorInfo?: { code?: string } })?.errorInfo?.code ?? "";
+              if (INVALID_TOKEN_CODES.has(code)) removeStaleToken(doc.id);
+            })
+          );
+        }
+        await Promise.allSettled(sends);
+        logger.info("[notification_requests] Fan-out sent", { type, count: sends.length });
+      } else if (topic) {
         await sendTopicPush(topic, title, body, { type, ...data });
         logger.info("[notification_requests] Topic sent", { topic, type });
       } else if (targetToken) {

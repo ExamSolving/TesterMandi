@@ -86,14 +86,14 @@ class AppsRepositoryImpl implements AppsRepository {
     required String appId,
     required String appName,
     required String ownerName,
+    required String ownerId,
   }) async {
-    // Uses FCM topic 'new_apps' — all users subscribed receive this push
     await _db.collection('notification_requests').add({
-      'topic': 'new_apps',
+      'type': 'new_app',
+      'excludeUserId': ownerId,
       'title': '🚀 New app listed!',
       'body': '$ownerName just listed "$appName" — be among the first testers!',
       'data': {'type': 'new_app', 'appId': appId, 'appName': appName},
-      'type': 'new_app',
       'createdAt': Timestamp.now(),
     });
   }

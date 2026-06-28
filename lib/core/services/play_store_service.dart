@@ -1,6 +1,3 @@
-import 'dart:convert' show utf8;
-import 'dart:io' show HttpClient, HttpHeaders;
-
 import 'package:http/http.dart' as http;
 
 class AppDetails {
@@ -15,7 +12,6 @@ class AppDetails {
   final String? iconUrl;
 
   /// True when details came from the public Play Store listing.
-  /// False when they came from the closed-testing opt-in page.
   final bool isPublic;
 
   bool get hasAnyData => name != null || iconUrl != null;
@@ -30,56 +26,35 @@ class PlayStoreService {
     'Accept': 'text/html,application/xhtml+xml',
   };
 
-  /// Tries the public listing first, then the closed-testing opt-in page.
-  /// Description is only populated from the public listing.
+  /// Fetches app details from the public Play Store listing only.
+  /// Returns empty [AppDetails] if the app is not publicly listed (closed
+  /// testing / not yet published). Caller is responsible for falling back to
+  /// the device query in that case.
   static Future<AppDetails> fetchAppDetails(String packageName) async {
     final pkg = packageName.trim();
     if (pkg.isEmpty) return const AppDetails();
 
-    // 1. Public listing.
-    final body = await _getBody(
-      Uri.parse('https://play.google.com/store/apps/details?id=$pkg&hl=en'),
-    );
-    if (body != null) {
-      final name = _extractName(body);
-      final iconUrl = _extractIconUrl(body);
-      if (name != null || iconUrl != null) {
-        return AppDetails(
-          name: name,
-          description: _extractDescription(body),
-          iconUrl: iconUrl,
-          isPublic: true,
-        );
-      }
-    }
+    try {
+      final res = await http
+          .get(
+            Uri.parse(
+                'https://play.google.com/store/apps/details?id=$pkg&hl=en'),
+            headers: _headers,
+          )
+          .timeout(const Duration(seconds: 6));
 
-    // 2. Closed-testing opt-in page — uses no-redirect HttpClient so we detect
-    //    the auth 302 via Location header (body-content checks are unreliable
-    //    because every Google page embeds accounts.google.com in its JS).
-    final testBody = await _getTestingBody(pkg);
-    if (testBody != null) {
-      final name = _extractNameFromTesting(testBody);
-      final iconUrl = _extractIconFromTesting(testBody);
-      if (name != null || iconUrl != null) {
-        return AppDetails(name: name, iconUrl: iconUrl, isPublic: false);
-      }
-    }
+      if (res.statusCode != 200) return const AppDetails();
 
-    // 3. APKCombo — public mirror that indexes Play Store apps including
-    //    beta/testing tracks without requiring authentication.
-    final comboBody = await _getBody(
-      Uri.parse('https://apkcombo.com/apk/$pkg/'),
-    );
-    if (comboBody != null) {
-      final name = _extractName(comboBody);
-      final iconUrl =
-          _extractIconUrl(comboBody) ?? _extractIconFromTesting(comboBody);
-      if (name != null || iconUrl != null) {
-        return AppDetails(name: name, iconUrl: iconUrl, isPublic: false);
-      }
+      final body = res.body;
+      return AppDetails(
+        name: _extractName(body),
+        description: _extractDescription(body),
+        iconUrl: _extractIconUrl(body),
+        isPublic: true,
+      );
+    } catch (_) {
+      return const AppDetails();
     }
-
-    return const AppDetails();
   }
 
   /// Convenience: icon URL only.
@@ -87,59 +62,7 @@ class PlayStoreService {
     return (await fetchAppDetails(packageName)).iconUrl;
   }
 
-  // ── HTTP helpers ──────────────────────────────────────────────────────────
-
-  /// Standard GET that follows redirects (fine for the public listing).
-  static Future<String?> _getBody(Uri uri) async {
-    try {
-      final res = await http
-          .get(uri, headers: _headers)
-          .timeout(const Duration(seconds: 12));
-      return res.statusCode == 200 ? res.body : null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// GET that manually follows redirects and aborts if any redirect leads to
-  /// accounts.google.com (auth wall). Returns the body only on a real 200.
-  static Future<String?> _getTestingBody(String pkg) async {
-    var uri = Uri.parse('https://play.google.com/apps/testing/$pkg');
-    final client = HttpClient();
-    try {
-      for (var hop = 0; hop < 5; hop++) {
-        final request = await client.getUrl(uri);
-        request.followRedirects = false;
-        _headers.forEach((k, v) => request.headers.set(k, v));
-        final response =
-            await request.close().timeout(const Duration(seconds: 12));
-
-        if (response.statusCode == 200) {
-          return await response.transform(utf8.decoder).join();
-        }
-
-        if (response.statusCode >= 301 && response.statusCode <= 308) {
-          final location =
-              response.headers.value(HttpHeaders.locationHeader) ?? '';
-          // Auth wall — give up.
-          if (location.contains('accounts.google.com')) return null;
-          // Other redirect (e.g. http→https) — follow it.
-          uri = uri.resolve(location);
-          continue;
-        }
-
-        // 404 or any other non-2xx/3xx.
-        return null;
-      }
-      return null;
-    } catch (_) {
-      return null;
-    } finally {
-      client.close();
-    }
-  }
-
-  // ── Public-listing extractors ─────────────────────────────────────────────
+  // ── Extractors ─────────────────────────────────────────────────────────────
 
   static String? _extractName(String body) {
     final ogTitle = RegExp(
@@ -201,39 +124,6 @@ class PlayStoreService {
       r'<img[^>]+itemprop="image"[^>]+src="(https://play-lh\.googleusercontent\.com/[^"]+)"',
     ).firstMatch(body)?.group(1);
     if (itemProp != null) return _cleanIconUrl(itemProp);
-
-    return null;
-  }
-
-  // ── Closed-testing page extractors ───────────────────────────────────────
-
-  static String? _extractNameFromTesting(String body) {
-    final og = RegExp(
-            r'<meta[^>]+property="og:title"[^>]+content="([^"]+)"',
-            caseSensitive: false)
-        .firstMatch(body)
-        ?.group(1);
-    if (og != null) return _stripSuffix(og);
-
-    final title =
-        RegExp(r'<title>([^<]+)</title>').firstMatch(body)?.group(1);
-    if (title != null) return _stripSuffix(title);
-
-    return null;
-  }
-
-  static String? _extractIconFromTesting(String body) {
-    final og = RegExp(
-            r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"',
-            caseSensitive: false)
-        .firstMatch(body)
-        ?.group(1);
-    if (og != null) return _cleanIconUrl(og);
-
-    final src = RegExp(
-      r'src="(https://play-lh\.googleusercontent\.com/[^"]+)"',
-    ).firstMatch(body)?.group(1);
-    if (src != null) return _cleanIconUrl(src);
 
     return null;
   }

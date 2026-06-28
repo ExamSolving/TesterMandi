@@ -316,4 +316,33 @@ abstract class TKeys {
   static const share = 'share';
   static const copy = 'copy';
   static const copied = 'copied';
+
+  // ── Testing Guide dialog ────────────────────────────────
+  static const testingGuideTitle        = 'testing_guide_title';
+  static const testingGuideSubtitle     = 'testing_guide_subtitle';
+  static const testingGuideGotIt        = 'testing_guide_got_it';
+  static const testingGuideWindowTitle  = 'testing_guide_window_title';
+  static const testingGuideWindow1      = 'testing_guide_window_1';
+  static const testingGuideWindow2      = 'testing_guide_window_2';
+  static const testingGuideWindow3      = 'testing_guide_window_3';
+  static const testingGuideEndsTitle    = 'testing_guide_ends_title';
+  static const testingGuideEnds1        = 'testing_guide_ends_1';
+  static const testingGuideEnds2        = 'testing_guide_ends_2';
+  static const testingGuideEnds3        = 'testing_guide_ends_3';
+  static const testingGuideProofsTitle  = 'testing_guide_proofs_title';
+  static const testingGuideProofs1      = 'testing_guide_proofs_1';
+  static const testingGuideProofs2      = 'testing_guide_proofs_2';
+  static const testingGuideProofs3      = 'testing_guide_proofs_3';
+  static const testingGuidePrivacyTitle = 'testing_guide_privacy_title';
+  static const testingGuidePrivacy1     = 'testing_guide_privacy_1';
+  static const testingGuidePrivacy2     = 'testing_guide_privacy_2';
+  static const testingGuidePrivacy3     = 'testing_guide_privacy_3';
+  static const testingGuideRemTitle     = 'testing_guide_reminders_title';
+  static const testingGuideRem1         = 'testing_guide_reminders_1';
+  static const testingGuideRem2         = 'testing_guide_reminders_2';
+  static const testingGuideRem3         = 'testing_guide_reminders_3';
+  static const testingGuideNextTitle    = 'testing_guide_next_title';
+  static const testingGuideNext1        = 'testing_guide_next_1';
+  static const testingGuideNext2        = 'testing_guide_next_2';
+  static const testingGuideNext3        = 'testing_guide_next_3';
 }

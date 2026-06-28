@@ -3,7 +3,6 @@
   "tagline": "जोड़ें · परखें · बढ़ें",
   "app_subtitle": "डेवलपर का टेस्टिंग हब",
   "app_version": "संस्करण 1.0.0",
-
   "btn_login": "लॉगिन करें",
   "btn_register": "पंजीकरण करें",
   "btn_continue": "जारी रखें",
@@ -25,7 +24,6 @@
   "btn_edit_profile": "प्रोफ़ाइल संपादित करें",
   "btn_change_language": "भाषा बदलें",
   "btn_change_theme": "थीम बदलें",
-
   "label_email": "ईमेल पता",
   "label_password": "पासवर्ड",
   "label_confirm_password": "पासवर्ड की पुष्टि",
@@ -36,7 +34,6 @@
   "label_description": "विवरण",
   "label_play_store_link": "Play Store टेस्टिंग लिंक",
   "label_category": "श्रेणी",
-
   "hint_email": "अपना ईमेल पता डालें",
   "hint_password": "अपना पासवर्ड डालें",
   "hint_confirm_password": "पासवर्ड दोबारा डालें",
@@ -46,7 +43,6 @@
   "hint_app_name": "जैसे: मेरा शानदार ऐप",
   "hint_description": "अपने ऐप के बारे में बताएं...",
   "hint_play_store_link": "https://play.google.com/apps/testing/...",
-
   "role_developer": "डेवलपर",
   "role_tester": "टेस्टर",
   "role_developer_desc": "मैं ऐप बनाता हूं और टेस्टर चाहिए",
@@ -62,7 +58,6 @@
   "role_selection_title": "आप यहां क्यों आए?",
   "role_selection_subtitle": "अपनी भूमिका चुनें और अनुभव को व्यक्तिगत बनाएं",
   "role_selection_choose": "भूमिका चुनें",
-
   "auth_welcome_back": "वापस स्वागत है",
   "auth_create_account": "खाता बनाएं",
   "auth_login_subtitle": "अपनी यात्रा जारी रखने के लिए साइन इन करें",
@@ -78,11 +73,9 @@
   "auth_and": " और ",
   "auth_privacy": "गोपनीयता नीति",
   "auth_password_reset_sent": "पासवर्ड रीसेट ईमेल भेज दिया। इनबॉक्स देखें।",
-
   "splash_loading": "शुरू हो रहा है...",
   "splash_tagline_1": "डेवलपर्स को जोड़ें",
   "splash_tagline_2": "असली टेस्टर्स से",
-
   "nav_home": "होम",
   "nav_apps": "ऐप्स",
   "nav_testing": "टेस्टिंग",
@@ -91,7 +84,6 @@
   "nav_browse": "ब्राउज़",
   "nav_my_tests": "मेरे टेस्ट",
   "nav_my_apps": "मेरे ऐप्स",
-
   "home_greeting_morning": "सुप्रभात",
   "home_greeting_afternoon": "नमस्कार",
   "home_greeting_evening": "शुभ संध्या",
@@ -110,7 +102,6 @@
   "home_recent_apps": "हाल के ऐप्स",
   "home_available_apps": "टेस्ट के लिए उपलब्ध",
   "home_my_progress": "मेरी प्रगति",
-
   "app_status_open": "खुला",
   "app_status_in_progress": "जारी है",
   "app_status_completed": "पूर्ण",
@@ -126,7 +117,6 @@
   "app_join_success": "सफलतापूर्वक टेस्टिंग से जुड़ गए!",
   "app_join_error": "टेस्टिंग से नहीं जुड़ पाए। फिर कोशिश करें।",
   "app_already_joined": "आप पहले से इस टेस्टिंग में हैं",
-
   "testing_day_of": "दिन @current / @total",
   "testing_days_active": "@days दिन सक्रिय",
   "testing_completed": "टेस्टिंग पूरी!",
@@ -135,12 +125,10 @@
   "testing_checkin": "दैनिक चेक-इन",
   "testing_checkin_done": "आज चेक-इन हो चुका है",
   "testing_checkin_success": "चेक-इन दर्ज हो गया!",
-
   "chat_no_messages": "अभी कोई संदेश नहीं। हैलो कहें!",
   "chat_online": "ऑनलाइन",
   "chat_offline": "हाल ही में देखा",
   "chat_new_message": "नया संदेश",
-
   "profile_edit": "प्रोफ़ाइल संपादित करें",
   "profile_reputation": "रेपुटेशन",
   "profile_tests_done": "टेस्ट पूरे",
@@ -157,7 +145,6 @@
   "profile_logout_confirm": "क्या आप लॉगआउट करना चाहते हैं?",
   "profile_logout_yes": "हाँ, लॉगआउट करें",
   "profile_member_since": "सदस्य बने",
-
   "add_app_title": "अपना ऐप पोस्ट करें",
   "add_app_name": "ऐप का नाम",
   "add_app_name_hint": "मेरा शानदार ऐप",
@@ -172,7 +159,6 @@
   "add_app_submit": "टेस्टिंग के लिए पोस्ट करें",
   "add_app_success": "ऐप सफलतापूर्वक पोस्ट किया!",
   "add_app_error": "ऐप पोस्ट करने में विफल। पुनः प्रयास करें।",
-
   "browse_title": "ऐप्स खोजें",
   "browse_subtitle": "टेस्ट करें और प्रतिष्ठा बढ़ाएं",
   "browse_empty": "अभी कोई ऐप उपलब्ध नहीं",
@@ -180,7 +166,6 @@
   "browse_testers": "टेस्टर्स",
   "browse_days_left": "दिन बाकी",
   "browse_test_this": "टेस्ट करें",
-
   "detail_join_testing": "टेस्टिंग से जुड़ें",
   "detail_already_testing": "पहले से टेस्टिंग में ✓",
   "detail_your_app": "आपका ऐप",
@@ -189,19 +174,16 @@
   "detail_join_success": "आप टेस्टिंग प्रोग्राम में शामिल हो गए!",
   "detail_join_error": "शामिल होने में विफल। पुनः प्रयास करें।",
   "detail_tester_progress": "टेस्टर प्रगति",
-
   "my_apps_empty": "अभी कोई ऐप पोस्ट नहीं",
   "my_apps_empty_sub": "टेस्टर्स पाने के लिए अपना पहला ऐप पोस्ट करें",
   "my_apps_add": "नया ऐप पोस्ट करें",
   "my_apps_status_active": "सक्रिय",
   "my_apps_status_completed": "भरा हुआ",
   "my_apps_status_expired": "समाप्त",
-
   "my_tests_empty": "अभी कोई टेस्ट नहीं",
   "my_tests_empty_sub": "ऐप्स ब्राउज़ करें और टेस्टिंग से जुड़ें",
   "my_tests_open_link": "ऑप्ट-इन लिंक खोलें",
   "my_tests_joined_on": "जुड़े",
-
   "rating_title": "इस टेस्टर को रेट करें",
   "rating_subtitle": "उनकी टेस्टिंग क्वालिटी कैसी थी?",
   "rating_comment": "टिप्पणी जोड़ें (वैकल्पिक)",
@@ -211,13 +193,11 @@
   "rating_good": "अच्छा",
   "rating_very_good": "बहुत अच्छा",
   "rating_excellent": "उत्कृष्ट",
-
   "notification_new_tester": "नए टेस्टर ने आपके ऐप से जुड़ा!",
   "notification_testing_started": "14-दिन की टेस्टिंग शुरू हो गई!",
   "notification_testing_complete": "टेस्टिंग अवधि पूरी हुई!",
   "notification_new_message": "आपका नया संदेश है",
   "notification_reminder": "आज चेक-इन करना न भूलें!",
-
   "error_generic": "कुछ गलत हुआ। कृपया फिर से प्रयास करें।",
   "error_network": "इंटरनेट नहीं है। नेटवर्क जांचें।",
   "error_email_in_use": "यह ईमेल पहले से पंजीकृत है।",
@@ -230,7 +210,6 @@
   "error_timeout": "अनुरोध का समय समाप्त। फिर प्रयास करें।",
   "error_google_signin": "Google साइन-इन विफल। फिर प्रयास करें।",
   "error_role_required": "जारी रखने के लिए भूमिका चुनें।",
-
   "validation_required": "यह फ़ील्ड आवश्यक है",
   "validation_email_invalid": "कृपया वैध ईमेल पता डालें",
   "validation_password_min": "पासवर्ड कम से कम 8 अक्षर का होना चाहिए",
@@ -238,13 +217,11 @@
   "validation_name_min": "नाम कम से कम 2 अक्षर का होना चाहिए",
   "validation_url_invalid": "कृपया वैध URL डालें",
   "validation_phone_invalid": "कृपया वैध फ़ोन नंबर डालें",
-
   "success_registered": "खाता सफलतापूर्वक बनाया गया!",
   "success_logged_in": "वापस स्वागत है!",
   "success_logged_out": "सफलतापूर्वक लॉगआउट हुए",
   "success_profile_updated": "प्रोफ़ाइल अपडेट हुई",
   "success_app_uploaded": "ऐप सफलतापूर्वक सूचीबद्ध हुआ!",
-
   "profile_rate_app": "टेस्टरमंडी को रेट करें",
   "profile_share_app": "दोस्तों के साथ शेयर करें",
   "profile_choose_theme": "स्वरूप",
@@ -260,36 +237,29 @@
   "profile_stat_testing": "टेस्टिंग",
   "profile_stat_testers": "टेस्टर्स मिले",
   "profile_stat_swaps": "स्वैप",
-
   "theme_light": "लाइट",
   "theme_dark": "डार्क",
   "theme_system": "सिस्टम",
-
   "lang_english": "English",
   "lang_hindi": "हिंदी",
   "lang_spanish": "Español",
   "lang_choose": "भाषा चुनें",
   "lang_select_title": "भाषा चुनें",
   "lang_select_subtitle": "अपनी पसंदीदा भाषा चुनें",
-
   "help_title": "सहायता",
   "help_email_support": "ईमेल सहायता",
   "help_email_value": "support@testermandi.com",
   "help_faq": "अक्सर पूछे जाने वाले प्रश्न",
   "help_privacy": "गोपनीयता नीति",
   "help_terms": "सेवा की शर्तें",
-
   "about_title": "टेस्टरमंडी के बारे में",
   "about_tagline": "डेवलपर्स को असली टेस्टर्स से जोड़ें",
   "about_made_with": "भारत में ❤️ से बनाया गया",
   "about_website": "www.testermandi.com",
-
   "share_text": "नमस्ते! TesterMandi से जुड़ें — असली Android टेस्टर्स से जुड़ें और अपना ऐप बढ़ाएं। अभी देखें!",
   "share_link_copied": "लिंक क्लिपबोर्ड में कॉपी हो गया!",
-
   "empty_state_title": "अभी कुछ नहीं है",
   "empty_state_subtitle": "बाद में जांचें या पेज रिफ्रेश करें",
-
   "loading": "लोड हो रहा है...",
   "refreshing": "रिफ्रेश हो रहा है...",
   "no_internet": "इंटरनेट कनेक्शन नहीं",
@@ -306,5 +276,32 @@
   "edit": "संपादित करें",
   "share": "शेयर करें",
   "copy": "कॉपी करें",
-  "copied": "कॉपी हो गया!"
+  "copied": "कॉपी हो गया!",
+  "testing_guide_title": "14-दिन की क्लोज़्ड टेस्टिंग",
+  "testing_guide_subtitle": "ऐप लिस्ट करने से पहले पढ़ें",
+  "testing_guide_got_it": "समझ गया",
+  "testing_guide_window_title": "आपकी 14-दिन की विंडो",
+  "testing_guide_window_1": "जॉइन करने के बाद प्रत्येक टेस्टर को आपका ऐप टेस्ट करने के लिए 14 दिन मिलते हैं",
+  "testing_guide_window_2": "सक्रिय रहने के लिए टेस्टर्स को रोज़ एक प्रूफ स्क्रीनशॉट जमा करना होगा",
+  "testing_guide_window_3": "अपने डैशबोर्ड से प्रत्येक प्रूफ को अप्रूव या रिजेक्ट करें",
+  "testing_guide_ends_title": "विंडो समाप्त होने पर",
+  "testing_guide_ends_1": "14 दिन बाद टेस्टिंग अपने आप निष्क्रिय हो जाती है",
+  "testing_guide_ends_2": "टेस्टर कभी भी नई 14-दिन की विंडो के लिए रिएक्टिवेट कर सकते हैं",
+  "testing_guide_ends_3": "14 दिनों में रिएक्टिवेशन नहीं? सभी टेस्टिंग डेटा स्थायी रूप से हटा दिया जाता है",
+  "testing_guide_proofs_title": "प्रूफ स्क्रीनशॉट",
+  "testing_guide_proofs_1": "प्रतिदिन 1 स्क्रीनशॉट टेस्टर के सक्रिय उपयोग की पुष्टि करता है",
+  "testing_guide_proofs_2": "स्क्रीनशॉट ऐप के उपयोग में दिखना चाहिए — सिर्फ होम स्क्रीन नहीं",
+  "testing_guide_proofs_3": "रिजेक्ट किए गए प्रूफ टेस्टर द्वारा दोबारा जमा किए जा सकते हैं",
+  "testing_guide_privacy_title": "गोपनीयता",
+  "testing_guide_privacy_1": "आपका पैकेज ID और ऑप्ट-इन लिंक केवल मिलान किए गए टेस्टर्स के साथ साझा किया जाता है",
+  "testing_guide_privacy_2": "टेस्टर की जानकारी कभी भी तीसरे पक्ष के साथ साझा नहीं की जाती",
+  "testing_guide_privacy_3": "हटाया गया डेटा हमारे सर्वर से स्थायी रूप से मिटा दिया जाता है",
+  "testing_guide_reminders_title": "रिमाइंडर",
+  "testing_guide_reminders_1": "टेस्टर्स को पुश नोटिफिकेशन के ज़रिए रोज़ाना प्रूफ रिमाइंडर मिलते हैं",
+  "testing_guide_reminders_2": "समीक्षा के लिए प्रूफ जमा होने पर आपको अलर्ट मिलता है",
+  "testing_guide_reminders_3": "14-दिन की विंडो समाप्त होने पर दोनों पक्षों को सूचित किया जाता है",
+  "testing_guide_next_title": "टेस्टिंग के बाद — आगे क्या",
+  "testing_guide_next_1": "अपने डैशबोर्ड में सभी जमा प्रूफ और फीडबैक देखें",
+  "testing_guide_next_2": "रिएक्टिवेट किए गए टेस्टर नई शुरुआत करते हैं — प्रूफ काउंट शून्य से शुरू होता है",
+  "testing_guide_next_3": "क्लीन-अप हुए स्लॉट नए टेस्टर्स के जॉइन करने के लिए मुक्त हो जाते हैं"
 }

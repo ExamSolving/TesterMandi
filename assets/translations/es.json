@@ -3,7 +3,6 @@
   "tagline": "Conecta · Prueba · Crece",
   "app_subtitle": "El Hub de Pruebas del Desarrollador",
   "app_version": "Versión 1.0.0",
-
   "btn_login": "Iniciar sesión",
   "btn_register": "Registrarse",
   "btn_continue": "Continuar",
@@ -25,7 +24,6 @@
   "btn_edit_profile": "Editar perfil",
   "btn_change_language": "Cambiar idioma",
   "btn_change_theme": "Cambiar tema",
-
   "label_email": "Correo electrónico",
   "label_password": "Contraseña",
   "label_confirm_password": "Confirmar contraseña",
@@ -36,7 +34,6 @@
   "label_description": "Descripción",
   "label_play_store_link": "Enlace de prueba de Play Store",
   "label_category": "Categoría",
-
   "hint_email": "Ingresa tu correo electrónico",
   "hint_password": "Ingresa tu contraseña",
   "hint_confirm_password": "Reingresa tu contraseña",
@@ -46,7 +43,6 @@
   "hint_app_name": "Ej: Mi aplicación increíble",
   "hint_description": "Describe qué hace tu aplicación...",
   "hint_play_store_link": "https://play.google.com/apps/testing/...",
-
   "role_developer": "Desarrollador",
   "role_tester": "Tester",
   "role_developer_desc": "Creo aplicaciones y necesito testers",
@@ -62,7 +58,6 @@
   "role_selection_title": "¿Por qué estás aquí?",
   "role_selection_subtitle": "Elige tu rol para personalizar tu experiencia",
   "role_selection_choose": "Elegir rol",
-
   "auth_welcome_back": "Bienvenido de nuevo",
   "auth_create_account": "Crear cuenta",
   "auth_login_subtitle": "Inicia sesión para continuar tu camino",
@@ -78,11 +73,9 @@
   "auth_and": " y ",
   "auth_privacy": "Política de privacidad",
   "auth_password_reset_sent": "Correo de restablecimiento enviado. Revisa tu bandeja.",
-
   "splash_loading": "Iniciando...",
   "splash_tagline_1": "Conecta Desarrolladores",
   "splash_tagline_2": "con Testers Reales",
-
   "nav_home": "Inicio",
   "nav_apps": "Apps",
   "nav_testing": "Pruebas",
@@ -91,7 +84,6 @@
   "nav_browse": "Explorar",
   "nav_my_tests": "Mis Pruebas",
   "nav_my_apps": "Mis Apps",
-
   "home_greeting_morning": "Buenos días",
   "home_greeting_afternoon": "Buenas tardes",
   "home_greeting_evening": "Buenas noches",
@@ -110,7 +102,6 @@
   "home_recent_apps": "Apps recientes",
   "home_available_apps": "Disponibles para probar",
   "home_my_progress": "Mi progreso",
-
   "app_status_open": "Abierta",
   "app_status_in_progress": "En progreso",
   "app_status_completed": "Completada",
@@ -126,7 +117,6 @@
   "app_join_success": "¡Te uniste a las pruebas exitosamente!",
   "app_join_error": "No se pudo unir a las pruebas. Intenta de nuevo.",
   "app_already_joined": "Ya estás en estas pruebas",
-
   "testing_day_of": "Día @current de @total",
   "testing_days_active": "@days días activo",
   "testing_completed": "¡Prueba completada!",
@@ -135,12 +125,10 @@
   "testing_checkin": "Check-in diario",
   "testing_checkin_done": "Check-in de hoy completado",
   "testing_checkin_success": "¡Check-in registrado!",
-
   "chat_no_messages": "Aún sin mensajes. ¡Di hola!",
   "chat_online": "En línea",
   "chat_offline": "Visto recientemente",
   "chat_new_message": "Nuevo mensaje",
-
   "profile_edit": "Editar perfil",
   "profile_reputation": "Reputación",
   "profile_tests_done": "Pruebas hechas",
@@ -172,33 +160,27 @@
   "profile_stat_testing": "Pruebas",
   "profile_stat_testers": "Testers obtenidos",
   "profile_stat_swaps": "Intercambios",
-
   "theme_light": "Claro",
   "theme_dark": "Oscuro",
   "theme_system": "Sistema",
-
   "lang_english": "English",
   "lang_hindi": "हिंदी",
   "lang_spanish": "Español",
   "lang_choose": "Elegir idioma",
   "lang_select_title": "Seleccionar idioma",
   "lang_select_subtitle": "Elige tu idioma preferido",
-
   "help_title": "Ayuda y soporte",
   "help_email_support": "Soporte por email",
   "help_email_value": "support@testermandi.com",
   "help_faq": "Preguntas frecuentes",
   "help_privacy": "Política de privacidad",
   "help_terms": "Términos de servicio",
-
   "about_title": "Acerca de TesterMandi",
   "about_tagline": "Conecta Desarrolladores con Testers Reales",
   "about_made_with": "Hecho con ❤️ en India",
   "about_website": "www.testermandi.com",
-
   "share_text": "¡Hola! Únete a TesterMandi — conecta con testers reales de Android y haz crecer tu app. ¡Échale un vistazo!",
   "share_link_copied": "¡Enlace copiado al portapapeles!",
-
   "add_app_title": "Publica tu App",
   "add_app_name": "Nombre de la app",
   "add_app_name_hint": "Mi app increíble",
@@ -213,7 +195,6 @@
   "add_app_submit": "Publicar para pruebas",
   "add_app_success": "¡App publicada exitosamente!",
   "add_app_error": "No se pudo publicar la app. Inténtalo de nuevo.",
-
   "browse_title": "Descubrir Apps",
   "browse_subtitle": "Prueba apps y gana reputación",
   "browse_empty": "No hay apps disponibles ahora",
@@ -221,7 +202,6 @@
   "browse_testers": "testers",
   "browse_days_left": "días restantes",
   "browse_test_this": "Probar esto",
-
   "detail_join_testing": "Unirse al programa de pruebas",
   "detail_already_testing": "Ya en pruebas ✓",
   "detail_your_app": "Tu app",
@@ -230,19 +210,16 @@
   "detail_join_success": "¡Te uniste al programa de pruebas!",
   "detail_join_error": "No se pudo unir. Inténtalo de nuevo.",
   "detail_tester_progress": "Progreso del tester",
-
   "my_apps_empty": "Aún sin apps publicadas",
   "my_apps_empty_sub": "Publica tu primera app para conseguir testers",
   "my_apps_add": "Publicar nueva app",
   "my_apps_status_active": "Activa",
   "my_apps_status_completed": "Llena",
   "my_apps_status_expired": "Expirada",
-
   "my_tests_empty": "Aún sin pruebas",
   "my_tests_empty_sub": "Explora apps y únete a un programa de pruebas",
   "my_tests_open_link": "Abrir enlace opt-in",
   "my_tests_joined_on": "Unido",
-
   "rating_title": "Calificar este tester",
   "rating_subtitle": "¿Cómo fue la calidad de sus pruebas?",
   "rating_comment": "Agregar comentario (opcional)",
@@ -252,13 +229,11 @@
   "rating_good": "Bueno",
   "rating_very_good": "Muy bueno",
   "rating_excellent": "Excelente",
-
   "notification_new_tester": "¡Un nuevo tester se unió a tu app!",
   "notification_testing_started": "¡El período de prueba de 14 días ha comenzado!",
   "notification_testing_complete": "¡El período de prueba ha terminado!",
   "notification_new_message": "Tienes un nuevo mensaje",
   "notification_reminder": "¡No olvides hacer check-in hoy!",
-
   "error_generic": "Algo salió mal. Inténtalo de nuevo.",
   "error_network": "Sin conexión a internet. Revisa tu red.",
   "error_email_in_use": "Este correo ya está registrado.",
@@ -271,7 +246,6 @@
   "error_timeout": "Tiempo de espera agotado. Inténtalo de nuevo.",
   "error_google_signin": "Google Sign-In falló. Inténtalo de nuevo.",
   "error_role_required": "Por favor selecciona un rol para continuar.",
-
   "validation_required": "Este campo es obligatorio",
   "validation_email_invalid": "Ingresa un correo electrónico válido",
   "validation_password_min": "La contraseña debe tener al menos 8 caracteres",
@@ -279,16 +253,13 @@
   "validation_name_min": "El nombre debe tener al menos 2 caracteres",
   "validation_url_invalid": "Ingresa una URL válida",
   "validation_phone_invalid": "Ingresa un número de teléfono válido",
-
   "success_registered": "¡Cuenta creada exitosamente!",
   "success_logged_in": "¡Bienvenido de nuevo!",
   "success_logged_out": "Sesión cerrada exitosamente",
   "success_profile_updated": "Perfil actualizado exitosamente",
   "success_app_uploaded": "¡App publicada exitosamente!",
-
   "empty_state_title": "Nada aquí todavía",
   "empty_state_subtitle": "Vuelve más tarde o actualiza la página",
-
   "loading": "Cargando...",
   "refreshing": "Actualizando...",
   "no_internet": "Sin conexión a internet",
@@ -305,5 +276,32 @@
   "edit": "Editar",
   "share": "Compartir",
   "copy": "Copiar",
-  "copied": "¡Copiado!"
+  "copied": "¡Copiado!",
+  "testing_guide_title": "Pruebas Cerradas de 14 Días",
+  "testing_guide_subtitle": "Lee esto antes de publicar tu app",
+  "testing_guide_got_it": "Entendido",
+  "testing_guide_window_title": "Tu Ventana de 14 Días",
+  "testing_guide_window_1": "Cada tester tiene exactamente 14 días desde que se une para probar tu app",
+  "testing_guide_window_2": "Los testers deben enviar una captura de pantalla diaria para mantenerse activos",
+  "testing_guide_window_3": "Aprueba o rechaza cada prueba desde tu panel de control",
+  "testing_guide_ends_title": "Cuando Termina la Ventana",
+  "testing_guide_ends_1": "Las pruebas se desactivan automáticamente después de 14 días",
+  "testing_guide_ends_2": "Los testers pueden reactivarse en cualquier momento para una nueva ventana",
+  "testing_guide_ends_3": "¿Sin reactivación en 14 días? Todos los datos se eliminan permanentemente",
+  "testing_guide_proofs_title": "Capturas de Prueba",
+  "testing_guide_proofs_1": "1 captura por día confirma que el tester usó activamente tu app",
+  "testing_guide_proofs_2": "Las capturas deben mostrar la app en uso — no solo la pantalla de inicio",
+  "testing_guide_proofs_3": "Las pruebas rechazadas pueden ser reenviadas por el tester",
+  "testing_guide_privacy_title": "Privacidad",
+  "testing_guide_privacy_1": "Tu ID de paquete y enlace solo se comparten con los testers asignados",
+  "testing_guide_privacy_2": "La información de los testers nunca se comparte con terceros",
+  "testing_guide_privacy_3": "Los datos eliminados se borran permanentemente de nuestros servidores",
+  "testing_guide_reminders_title": "Recordatorios",
+  "testing_guide_reminders_1": "Los testers reciben recordatorios diarios de prueba por notificación push",
+  "testing_guide_reminders_2": "Recibes una alerta cuando un tester envía una prueba para revisión",
+  "testing_guide_reminders_3": "Ambas partes son notificadas cuando termina la ventana de 14 días",
+  "testing_guide_next_title": "Después de Probar — ¿Qué Sigue?",
+  "testing_guide_next_1": "Revisa todas las pruebas y comentarios enviados en tu panel",
+  "testing_guide_next_2": "Los testers reactivados empiezan de cero — el contador de pruebas se reinicia",
+  "testing_guide_next_3": "Los espacios liberados quedan disponibles para que nuevos testers se unan"
 }

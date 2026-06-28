@@ -3,7 +3,6 @@
   "tagline": "Connect · Test · Grow",
   "app_subtitle": "The Developer's Testing Hub",
   "app_version": "Version 1.0.0",
-
   "btn_login": "Login",
   "btn_register": "Register",
   "btn_continue": "Continue",
@@ -25,7 +24,6 @@
   "btn_edit_profile": "Edit Profile",
   "btn_change_language": "Change Language",
   "btn_change_theme": "Toggle Theme",
-
   "label_email": "Email Address",
   "label_password": "Password",
   "label_confirm_password": "Confirm Password",
@@ -36,7 +34,6 @@
   "label_description": "Description",
   "label_play_store_link": "Play Store Testing Link",
   "label_category": "Category",
-
   "hint_email": "Enter your email address",
   "hint_password": "Enter your password",
   "hint_confirm_password": "Re-enter your password",
@@ -46,7 +43,6 @@
   "hint_app_name": "e.g. My Awesome App",
   "hint_description": "Describe what your app does...",
   "hint_play_store_link": "https://play.google.com/apps/testing/...",
-
   "role_developer": "Developer",
   "role_tester": "Tester",
   "role_developer_desc": "I build apps and need testers",
@@ -62,7 +58,6 @@
   "role_selection_title": "What brings you here?",
   "role_selection_subtitle": "Choose your role to personalize your experience",
   "role_selection_choose": "Choose Role",
-
   "auth_welcome_back": "Welcome Back",
   "auth_create_account": "Create Account",
   "auth_login_subtitle": "Sign in to continue your journey",
@@ -78,11 +73,9 @@
   "auth_and": " and ",
   "auth_privacy": "Privacy Policy",
   "auth_password_reset_sent": "Password reset email sent. Check your inbox.",
-
   "splash_loading": "Initializing...",
   "splash_tagline_1": "Connect Developers",
   "splash_tagline_2": "with Real Testers",
-
   "nav_home": "Home",
   "nav_apps": "Apps",
   "nav_testing": "Testing",
@@ -91,7 +84,6 @@
   "nav_browse": "Browse",
   "nav_my_tests": "My Tests",
   "nav_my_apps": "My Apps",
-
   "home_greeting_morning": "Good Morning",
   "home_greeting_afternoon": "Good Afternoon",
   "home_greeting_evening": "Good Evening",
@@ -110,7 +102,6 @@
   "home_recent_apps": "Recent Apps",
   "home_available_apps": "Available to Test",
   "home_my_progress": "My Progress",
-
   "app_status_open": "Open",
   "app_status_in_progress": "In Progress",
   "app_status_completed": "Completed",
@@ -126,7 +117,6 @@
   "app_join_success": "Successfully joined testing!",
   "app_join_error": "Could not join testing. Try again.",
   "app_already_joined": "You have already joined this testing",
-
   "testing_day_of": "Day @current of @total",
   "testing_days_active": "@days days active",
   "testing_completed": "Testing Complete!",
@@ -135,12 +125,10 @@
   "testing_checkin": "Daily Check-In",
   "testing_checkin_done": "Checked in today",
   "testing_checkin_success": "Check-in recorded!",
-
   "chat_no_messages": "No messages yet. Say hello!",
   "chat_online": "Online",
   "chat_offline": "Last seen recently",
   "chat_new_message": "New Message",
-
   "profile_edit": "Edit Profile",
   "profile_reputation": "Reputation",
   "profile_tests_done": "Tests Done",
@@ -157,7 +145,6 @@
   "profile_logout_confirm": "Are you sure you want to logout?",
   "profile_logout_yes": "Yes, Logout",
   "profile_member_since": "Member since",
-
   "add_app_title": "Post Your App",
   "add_app_name": "App Name",
   "add_app_name_hint": "My Awesome App",
@@ -172,7 +159,6 @@
   "add_app_submit": "Post for Testing",
   "add_app_success": "App posted successfully!",
   "add_app_error": "Failed to post app. Please try again.",
-
   "browse_title": "Discover Apps",
   "browse_subtitle": "Test apps and earn reputation",
   "browse_empty": "No apps available right now",
@@ -180,7 +166,6 @@
   "browse_testers": "testers",
   "browse_days_left": "days left",
   "browse_test_this": "Test This",
-
   "detail_join_testing": "Join Testing Program",
   "detail_already_testing": "Already Testing ✓",
   "detail_your_app": "Your App",
@@ -189,19 +174,16 @@
   "detail_join_success": "You joined the testing program!",
   "detail_join_error": "Failed to join. Please try again.",
   "detail_tester_progress": "Tester Progress",
-
   "my_apps_empty": "No apps posted yet",
   "my_apps_empty_sub": "Post your first app to start getting testers",
   "my_apps_add": "Post New App",
   "my_apps_status_active": "Active",
   "my_apps_status_completed": "Full",
   "my_apps_status_expired": "Expired",
-
   "my_tests_empty": "Not testing any apps yet",
   "my_tests_empty_sub": "Browse apps and join a testing program",
   "my_tests_open_link": "Open Opt-in Link",
   "my_tests_joined_on": "Joined",
-
   "rating_title": "Rate This Tester",
   "rating_subtitle": "How was their testing quality?",
   "rating_comment": "Add a comment (optional)",
@@ -211,13 +193,11 @@
   "rating_good": "Good",
   "rating_very_good": "Very Good",
   "rating_excellent": "Excellent",
-
   "notification_new_tester": "New tester joined your app!",
   "notification_testing_started": "14-day testing period has started!",
   "notification_testing_complete": "Testing period completed!",
   "notification_new_message": "You have a new message",
   "notification_reminder": "Don't forget to check in today!",
-
   "error_generic": "Something went wrong. Please try again.",
   "error_network": "No internet connection. Check your network.",
   "error_email_in_use": "This email address is already registered.",
@@ -230,7 +210,6 @@
   "error_timeout": "Request timed out. Please try again.",
   "error_google_signin": "Google Sign-In failed. Please try again.",
   "error_role_required": "Please select a role to continue.",
-
   "validation_required": "This field is required",
   "validation_email_invalid": "Please enter a valid email address",
   "validation_password_min": "Password must be at least 8 characters",
@@ -238,13 +217,11 @@
   "validation_name_min": "Name must be at least 2 characters",
   "validation_url_invalid": "Please enter a valid URL",
   "validation_phone_invalid": "Please enter a valid phone number",
-
   "success_registered": "Account created successfully!",
   "success_logged_in": "Welcome back!",
   "success_logged_out": "Logged out successfully",
   "success_profile_updated": "Profile updated successfully",
   "success_app_uploaded": "App listed successfully!",
-
   "profile_rate_app": "Rate TesterMandi",
   "profile_share_app": "Share with Friends",
   "profile_choose_theme": "Appearance",
@@ -260,36 +237,29 @@
   "profile_stat_testing": "Testing",
   "profile_stat_testers": "Testers Got",
   "profile_stat_swaps": "Swaps Done",
-
   "theme_light": "Light",
   "theme_dark": "Dark",
   "theme_system": "System",
-
   "lang_english": "English",
   "lang_hindi": "हिंदी",
   "lang_spanish": "Español",
   "lang_choose": "Choose Language",
   "lang_select_title": "Select Language",
   "lang_select_subtitle": "Choose your preferred language",
-
   "help_title": "Help & Support",
   "help_email_support": "Email Support",
   "help_email_value": "support@testermandi.com",
   "help_faq": "FAQ",
   "help_privacy": "Privacy Policy",
   "help_terms": "Terms of Service",
-
   "about_title": "About TesterMandi",
   "about_tagline": "Connect Developers with Real Testers",
   "about_made_with": "Made with ❤️ in India",
   "about_website": "www.testermandi.com",
-
   "share_text": "Hey! Join TesterMandi — connect with real Android testers and grow your app. Check it out!",
   "share_link_copied": "Link copied to clipboard!",
-
   "empty_state_title": "Nothing here yet",
   "empty_state_subtitle": "Check back later or refresh the page",
-
   "loading": "Loading...",
   "refreshing": "Refreshing...",
   "no_internet": "No internet connection",
@@ -306,5 +276,32 @@
   "edit": "Edit",
   "share": "Share",
   "copy": "Copy",
-  "copied": "Copied!"
+  "copied": "Copied!",
+  "testing_guide_title": "14-Day Closed Testing",
+  "testing_guide_subtitle": "Read before listing your app",
+  "testing_guide_got_it": "Got It",
+  "testing_guide_window_title": "Your 14-Day Window",
+  "testing_guide_window_1": "Each tester gets exactly 14 days from joining to test your app",
+  "testing_guide_window_2": "Testers must submit a daily proof screenshot to stay active",
+  "testing_guide_window_3": "Approve or reject each proof from your dashboard",
+  "testing_guide_ends_title": "When the Window Ends",
+  "testing_guide_ends_1": "Testing is auto-deactivated after 14 days",
+  "testing_guide_ends_2": "Testers can reactivate anytime to start a fresh 14-day window",
+  "testing_guide_ends_3": "No reactivation within 14 days? All testing data is permanently deleted",
+  "testing_guide_proofs_title": "Proof Screenshots",
+  "testing_guide_proofs_1": "1 screenshot per day confirms the tester actively used your app",
+  "testing_guide_proofs_2": "Screenshots must show the app in use — not just the home screen",
+  "testing_guide_proofs_3": "Rejected proofs can be resubmitted by the tester",
+  "testing_guide_privacy_title": "Privacy",
+  "testing_guide_privacy_1": "Your package ID and opt-in link are shared with matched testers only",
+  "testing_guide_privacy_2": "Tester information is never shared with third parties",
+  "testing_guide_privacy_3": "Deleted data is permanently removed from our servers",
+  "testing_guide_reminders_title": "Reminders",
+  "testing_guide_reminders_1": "Testers receive daily proof reminders via push notification",
+  "testing_guide_reminders_2": "You get alerted when a tester submits a proof for review",
+  "testing_guide_reminders_3": "Both parties are notified when the 14-day window ends",
+  "testing_guide_next_title": "After Testing — What’s Next",
+  "testing_guide_next_1": "Review all submitted proofs and feedback in your dashboard",
+  "testing_guide_next_2": "Reactivated testers start fresh — proof count resets to zero",
+  "testing_guide_next_3": "Cleaned-up slots are freed so new testers can join your app"
 }

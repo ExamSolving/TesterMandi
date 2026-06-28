@@ -61,9 +61,17 @@ class _AddAppViewState extends State<AddAppView> {
 
   @override
   void dispose() {
-    // Reset when user closes or navigates away without submitting.
     ctrl.resetAddAppForm();
     super.dispose();
+  }
+
+  void _showTestingGuide(BuildContext context, bool isDark) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _TestingGuideSheet(isDark: isDark),
+    );
   }
 
   @override
@@ -92,6 +100,22 @@ class _AddAppViewState extends State<AddAppView> {
                 icon: const Icon(Icons.close_rounded),
                 onPressed: Get.back,
               )),
+        actions: [
+          IconButton(
+            tooltip: TKeys.testingGuideTitle.tr,
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.info_outline_rounded,
+                  color: AppColors.primary, size: 18),
+            ),
+            onPressed: () => _showTestingGuide(context, isDark),
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       body: Column(
         children: [
@@ -410,7 +434,7 @@ class _PackageStep extends StatelessWidget {
             )),
         const SizedBox(height: 20),
 
-        _SectionLabel('Short Description', required: true, isDark: isDark),
+        _SectionLabel('Short Description', isDark: isDark, badge: 'Optional'),
         const SizedBox(height: 8),
         Obx(() => TMTextField(
               controller: ctrl.descCtrl,
@@ -418,8 +442,6 @@ class _PackageStep extends StatelessWidget {
               hint: 'Briefly describe what your app does and what testers should focus on…',
               maxLines: 4,
               enabled: !ctrl.packageAlreadyListed.value,
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? TKeys.validationRequired.tr : null,
             )),
         const SizedBox(height: 8),
         Obx(() {
@@ -695,7 +717,7 @@ class _SetupStep extends StatelessWidget {
               TMTextField(
                 controller: ctrl.optInCtrl,
                 label: '',
-                hint: 'https://play.google.com/apps/testing/...',
+                hint: 'https://groups.google.com/g/your',
                 prefixIcon: Icons.group_add_rounded,
                 keyboardType: TextInputType.url,
               ),
@@ -1851,6 +1873,332 @@ class _SetupInstructionCard extends StatelessWidget {
             description: 'In Play Console → Testing → Closed testing → Testers, add this email as a tester group:',
             highlight: AppConstants.platformGroupEmail,
             isDark: isDark,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TESTING GUIDE SHEET
+// ══════════════════════════════════════════════════════════════════════════════
+
+class _TestingGuideSheet extends StatelessWidget {
+  const _TestingGuideSheet({required this.isDark});
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final cardBg = isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC);
+    final border = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.92,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (_, scrollCtrl) => Container(
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          children: [
+            // ── Drag handle ──────────────────────────────────────────────────
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // ── Scrollable body ──────────────────────────────────────────────
+            Expanded(
+              child: ListView(
+                controller: scrollCtrl,
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                children: [
+                  // ── Header ────────────────────────────────────────────────
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.35),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.science_rounded,
+                              color: Colors.white, size: 32),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          TKeys.testingGuideTitle.tr,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          TKeys.testingGuideSubtitle.tr,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.78),
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Sections ──────────────────────────────────────────────
+                  _GuideSection(
+                    icon: Icons.timer_rounded,
+                    iconColor: const Color(0xFF6366F1),
+                    title: TKeys.testingGuideWindowTitle.tr,
+                    bullets: [
+                      TKeys.testingGuideWindow1.tr,
+                      TKeys.testingGuideWindow2.tr,
+                      TKeys.testingGuideWindow3.tr,
+                    ],
+                    cardBg: cardBg,
+                    border: border,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+
+                  _GuideSection(
+                    icon: Icons.pause_circle_rounded,
+                    iconColor: const Color(0xFFF59E0B),
+                    title: TKeys.testingGuideEndsTitle.tr,
+                    bullets: [
+                      TKeys.testingGuideEnds1.tr,
+                      TKeys.testingGuideEnds2.tr,
+                      TKeys.testingGuideEnds3.tr,
+                    ],
+                    cardBg: cardBg,
+                    border: border,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+
+                  _GuideSection(
+                    icon: Icons.photo_camera_rounded,
+                    iconColor: const Color(0xFF10B981),
+                    title: TKeys.testingGuideProofsTitle.tr,
+                    bullets: [
+                      TKeys.testingGuideProofs1.tr,
+                      TKeys.testingGuideProofs2.tr,
+                      TKeys.testingGuideProofs3.tr,
+                    ],
+                    cardBg: cardBg,
+                    border: border,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+
+                  _GuideSection(
+                    icon: Icons.lock_rounded,
+                    iconColor: const Color(0xFF0EA5E9),
+                    title: TKeys.testingGuidePrivacyTitle.tr,
+                    bullets: [
+                      TKeys.testingGuidePrivacy1.tr,
+                      TKeys.testingGuidePrivacy2.tr,
+                      TKeys.testingGuidePrivacy3.tr,
+                    ],
+                    cardBg: cardBg,
+                    border: border,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+
+                  _GuideSection(
+                    icon: Icons.notifications_active_rounded,
+                    iconColor: const Color(0xFFF472B6),
+                    title: TKeys.testingGuideRemTitle.tr,
+                    bullets: [
+                      TKeys.testingGuideRem1.tr,
+                      TKeys.testingGuideRem2.tr,
+                      TKeys.testingGuideRem3.tr,
+                    ],
+                    cardBg: cardBg,
+                    border: border,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+
+                  _GuideSection(
+                    icon: Icons.rocket_launch_rounded,
+                    iconColor: const Color(0xFF34D399),
+                    title: TKeys.testingGuideNextTitle.tr,
+                    bullets: [
+                      TKeys.testingGuideNext1.tr,
+                      TKeys.testingGuideNext2.tr,
+                      TKeys.testingGuideNext3.tr,
+                    ],
+                    cardBg: cardBg,
+                    border: border,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 28),
+
+                  // ── Got It button ─────────────────────────────────────────
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.check_circle_rounded, size: 20),
+                      label: Text(
+                        TKeys.testingGuideGotIt.tr,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6366F1),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Single guide section card ─────────────────────────────────────────────────
+
+class _GuideSection extends StatelessWidget {
+  const _GuideSection({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.bullets,
+    required this.cardBg,
+    required this.border,
+    required this.isDark,
+  });
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final List<String> bullets;
+  final Color cardBg;
+  final Color border;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: iconColor, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Bullet points
+          ...bullets.map(
+            (text) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: iconColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.45,
+                        color: isDark
+                            ? AppColors.textSecondaryDark
+                            : AppColors.textSecondaryLight,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

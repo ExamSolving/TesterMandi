@@ -36,9 +36,9 @@ abstract final class AdmobConfig {
   // Set to false to instantly kill an entire ad format across the whole app.
   // ═══════════════════════════════════════════════════════════════════════════
 
-  static const bool enableBannerAds       = true;  // all banner placements
-  static const bool enableInterstitialAds = true;  // all interstitial triggers
-  static const bool enableAppOpenAds      = true;  // app-open on resume
+  static const bool enableBannerAds = true; // all banner placements
+  static const bool enableInterstitialAds = false; // all interstitial triggers
+  static const bool enableAppOpenAds = false; // app-open on resume
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SECTION 2 — PER-PLACEMENT BANNER FLAGS
@@ -46,19 +46,25 @@ abstract final class AdmobConfig {
   // Set a flag to false to hide the banner at that one spot.
   // ═══════════════════════════════════════════════════════════════════════════
 
-  static const bool showBannerInBrowseTab     = true; // Browse tab list (after 3rd item)
-  static const bool showBannerInDashboardTab  = true; // Dashboard (between proof sections)
-  static const bool showBannerInProfileTab    = true; // Profile (below stats row)
-  static const bool showBannerInNotifications = true; // Notifications screen (top of list)
-  static const bool showBannerInSubmitProof   = true; // Submit Proof screen (above button)
+  static const bool showBannerInBrowseTab =
+      true; // Browse tab list (after 3rd item)
+  static const bool showBannerInDashboardTab =
+      true; // Dashboard (between proof sections)
+  static const bool showBannerInProfileTab = true; // Profile (below stats row)
+  static const bool showBannerInNotifications =
+      true; // Notifications screen (top of list)
+  static const bool showBannerInSubmitProof =
+      true; // Submit Proof screen (above button)
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SECTION 3 — PER-TRIGGER INTERSTITIAL FLAGS
   // Only evaluated when enableInterstitialAds = true.
   // ═══════════════════════════════════════════════════════════════════════════
 
-  static const bool showInterstitialOnProofSubmit = true; // after proof submitted
-  static const bool showInterstitialOnAppPosted   = true; // after app posted (CTA tap)
+  static const bool showInterstitialOnProofSubmit =
+      false; // after proof submitted
+  static const bool showInterstitialOnAppPosted =
+      false; // after app posted (CTA tap)
 
   // ═══════════════════════════════════════════════════════════════════════════
   // SECTION 4 — AD UNIT IDs
@@ -112,11 +118,16 @@ abstract final class AdmobConfig {
   static bool isBannerEnabled(BannerPlacement placement) {
     if (!enableBannerAds) return false;
     switch (placement) {
-      case BannerPlacement.browseTab:      return showBannerInBrowseTab;
-      case BannerPlacement.dashboardTab:   return showBannerInDashboardTab;
-      case BannerPlacement.profileTab:     return showBannerInProfileTab;
-      case BannerPlacement.notifications:  return showBannerInNotifications;
-      case BannerPlacement.submitProof:    return showBannerInSubmitProof;
+      case BannerPlacement.browseTab:
+        return showBannerInBrowseTab;
+      case BannerPlacement.dashboardTab:
+        return showBannerInDashboardTab;
+      case BannerPlacement.profileTab:
+        return showBannerInProfileTab;
+      case BannerPlacement.notifications:
+        return showBannerInNotifications;
+      case BannerPlacement.submitProof:
+        return showBannerInSubmitProof;
     }
   }
 }

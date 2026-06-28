@@ -14,5 +14,6 @@ abstract class AppsRepository {
     required String appId,
     required String appName,
     required String ownerName,
+    required String ownerId,
   });
 }

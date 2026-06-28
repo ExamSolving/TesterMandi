@@ -83,8 +83,7 @@ class AppsController extends GetxController {
 
   bool get _step1Valid =>
       packageCtrl.text.trim().contains('.') &&
-      nameCtrl.text.trim().isNotEmpty &&
-      descCtrl.text.trim().isNotEmpty;
+      nameCtrl.text.trim().isNotEmpty;
 
   bool get _step2Valid => selectedAppCategory.value != null;
 
@@ -94,7 +93,7 @@ class AppsController extends GetxController {
       return;
     }
     if (currentStep.value == 0 && !_step1Valid) {
-      _snack('Please fill Package ID, App Name and Description');
+      _snack('Please fill Package ID and App Name');
       return;
     }
     if (currentStep.value == 1 && !_step2Valid) {
@@ -138,8 +137,10 @@ class AppsController extends GetxController {
   // ── Play Store + device lookup ─────────────────────────────────────────────
 
   /// Search handler: runs Play Store lookup, duplicate check, and device
-  /// detection all in parallel so a closed-testing APK is always detected
-  /// even when Play Store scraping returns partial data.
+  /// detection all in parallel.
+  ///   Case 1 — public Play Store: fill name + description + icon from Play Store.
+  ///   Case 2 — not public but installed on device: fill name + icon from device.
+  ///   Case 3 — neither: show fill-manually error.
   Future<void> lookupAppDetails() async {
     final pkg = packageCtrl.text.trim();
     if (pkg.isEmpty || !pkg.contains('.')) return;
@@ -175,7 +176,7 @@ class AppsController extends GetxController {
       }
 
       if (details.hasAnyData) {
-        // Play Store (public or closed-testing page) returned useful data.
+        // Case 1: publicly listed on Play Store.
         if (details.name != null && nameCtrl.text.trim().isEmpty) {
           nameCtrl.text = details.name!;
         }
@@ -451,6 +452,7 @@ class AppsController extends GetxController {
         appId: id,
         appName: postedName,
         ownerName: user.displayName,
+        ownerId: user.uid,
       ).catchError((_) {});
 
       return postedName;
