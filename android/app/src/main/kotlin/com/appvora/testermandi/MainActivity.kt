@@ -29,18 +29,33 @@ class MainActivity : FlutterActivity() {
                             return@setMethodCallHandler
                         }
                         try {
-                            val appInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                packageManager.getApplicationInfo(
-                                    packageId,
-                                    PackageManager.ApplicationInfoFlags.of(0L)
+                            // Use queryIntentActivities with the launcher intent — works within
+                            // the <queries> declaration without needing QUERY_ALL_PACKAGES.
+                            val launchIntent = android.content.Intent(
+                                android.content.Intent.ACTION_MAIN
+                            ).apply {
+                                addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+                                `package` = packageId
+                            }
+
+                            val activities = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                packageManager.queryIntentActivities(
+                                    launchIntent,
+                                    PackageManager.ResolveInfoFlags.of(0L)
                                 )
                             } else {
                                 @Suppress("DEPRECATION")
-                                packageManager.getApplicationInfo(packageId, 0)
+                                packageManager.queryIntentActivities(launchIntent, 0)
                             }
+
+                            if (activities.isEmpty()) {
+                                result.success(mapOf("installed" to false, "name" to null, "iconBase64" to null))
+                                return@setMethodCallHandler
+                            }
+
+                            val appInfo = activities.first().activityInfo.applicationInfo
                             val appName = packageManager.getApplicationLabel(appInfo).toString()
 
-                            // Extract icon as base64 PNG
                             val iconBase64 = try {
                                 val drawable = packageManager.getApplicationIcon(appInfo)
                                 val bitmap = drawableToBitmap(drawable)
@@ -56,7 +71,7 @@ class MainActivity : FlutterActivity() {
                                 "name" to appName,
                                 "iconBase64" to iconBase64,
                             ))
-                        } catch (e: PackageManager.NameNotFoundException) {
+                        } catch (e: Exception) {
                             result.success(mapOf("installed" to false, "name" to null, "iconBase64" to null))
                         }
                     }

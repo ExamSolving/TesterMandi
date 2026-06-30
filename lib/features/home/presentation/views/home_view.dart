@@ -200,12 +200,20 @@ class _DashboardTab extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: isDark
             ? const LinearGradient(
-                colors: [Color(0xFF06050F), Color(0xFF0E0D22), Color(0xFF080820)],
+                colors: [
+                  Color(0xFF06050F),
+                  Color(0xFF0E0D22),
+                  Color(0xFF080820),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               )
             : const LinearGradient(
-                colors: [Color(0xFF312E81), Color(0xFF5B21B6), Color(0xFF3730A3)],
+                colors: [
+                  Color(0xFF312E81),
+                  Color(0xFF5B21B6),
+                  Color(0xFF3730A3),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -244,7 +252,8 @@ class _DashboardTab extends StatelessWidget {
                               // Badge pill: TesterMandi
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 4,
+                                  horizontal: 10,
+                                  vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withValues(alpha: 0.12),
@@ -270,7 +279,9 @@ class _DashboardTab extends StatelessWidget {
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.white.withValues(alpha: 0.85),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.85,
+                                        ),
                                         letterSpacing: 0.3,
                                       ),
                                     ),
@@ -301,10 +312,10 @@ class _DashboardTab extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 14),
-                        Column(
+                        Row(
                           children: [
                             _NotificationBell(isDark: isDark),
-                            const SizedBox(height: 10),
+                            const SizedBox(width: 10),
                             GestureDetector(
                               onTap: () =>
                                   Get.find<HomeController>().changeTab(4),
@@ -314,14 +325,18 @@ class _DashboardTab extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFFBB9FFF), Color(0xFF818CF8)],
+                                    colors: [
+                                      Color(0xFFBB9FFF),
+                                      Color(0xFF818CF8),
+                                    ],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF7C3AED)
-                                          .withValues(alpha: 0.5),
+                                      color: const Color(
+                                        0xFF7C3AED,
+                                      ).withValues(alpha: 0.5),
                                       blurRadius: 16,
                                       offset: const Offset(0, 5),
                                     ),
@@ -361,13 +376,13 @@ class _DashboardTab extends StatelessWidget {
   }
 
   Widget _circle(double size, double opacity) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: opacity),
-        ),
-      );
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: Colors.white.withValues(alpha: opacity),
+    ),
+  );
 
   Widget _buildHeroStats(AppsController apps, TestingController testing) {
     return Obx(() {
@@ -408,12 +423,24 @@ class _DashboardTab extends StatelessWidget {
 
   Widget _buildHowItWorks() {
     final steps = [
-      (icon: Icons.rocket_launch_rounded, color: const Color(0xFF6366F1),
-       label: 'Post App', sub: 'List your app'),
-      (icon: Icons.swap_horiz_rounded, color: const Color(0xFF0891B2),
-       label: 'Swap & Test', sub: 'Exchange testing'),
-      (icon: Icons.verified_rounded, color: const Color(0xFF059669),
-       label: 'Submit Proof', sub: 'Screenshot proof'),
+      (
+        icon: Icons.rocket_launch_rounded,
+        color: const Color(0xFF6366F1),
+        label: 'Post App',
+        sub: 'List your app',
+      ),
+      (
+        icon: Icons.swap_horiz_rounded,
+        color: const Color(0xFF0891B2),
+        label: 'Swap & Test',
+        sub: 'Exchange testing',
+      ),
+      (
+        icon: Icons.verified_rounded,
+        color: const Color(0xFF059669),
+        label: 'Submit Proof',
+        sub: 'Screenshot proof',
+      ),
     ];
 
     return Padding(
@@ -560,14 +587,16 @@ class _DashboardTab extends StatelessWidget {
         );
       }
 
-      final myParticipations =
-          testing.myParticipations.where((p) => p.isActive).toList();
-      final deactivatedParticipations =
-          testing.myParticipations.where((p) => p.isDeactivated).toList();
-      final myTesters =
-          testing.myAppTesters.where((p) => p.isActive).toList();
+      final myParticipations = testing.myParticipations
+          .where((p) => p.isActive)
+          .toList();
+      final deactivatedParticipations = testing.myParticipations
+          .where((p) => p.isDeactivated)
+          .toList();
+      final myTesters = testing.myAppTesters.where((p) => p.isActive).toList();
       final myApps = apps.myApps.toList();
-      final allEmpty = myApps.isEmpty &&
+      final allEmpty =
+          myApps.isEmpty &&
           myParticipations.isEmpty &&
           myTesters.isEmpty &&
           deactivatedParticipations.isEmpty;
@@ -759,9 +788,7 @@ class _DashSectionHeader extends StatelessWidget {
               decoration: BoxDecoration(
                 color: accentColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: accentColor.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: accentColor.withValues(alpha: 0.3)),
               ),
               child: Text(
                 '$count',
@@ -842,8 +869,7 @@ class _DashEmptyCard extends StatelessWidget {
           GestureDetector(
             onTap: onTap,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [color, color.withValues(alpha: 0.75)],
@@ -1329,19 +1355,16 @@ class _BrowseTabState extends State<_BrowseTab> {
               return SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (ctx, i) {
-                      if (hasAd && i == adInsertAt) {
-                        return const BannerAdWidget(
-                          placement: BannerPlacement.browseTab,
-                          margin: EdgeInsets.symmetric(vertical: 6),
-                        );
-                      }
-                      final ri = hasAd && i > adInsertAt ? i - 1 : i;
-                      return _BrowseTile(app: list[ri], isDark: isDark);
-                    },
-                    childCount: hasAd ? list.length + 1 : list.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((ctx, i) {
+                    if (hasAd && i == adInsertAt) {
+                      return const BannerAdWidget(
+                        placement: BannerPlacement.browseTab,
+                        margin: EdgeInsets.symmetric(vertical: 6),
+                      );
+                    }
+                    final ri = hasAd && i > adInsertAt ? i - 1 : i;
+                    return _BrowseTile(app: list[ri], isDark: isDark);
+                  }, childCount: hasAd ? list.length + 1 : list.length),
                 ),
               );
             }),
@@ -1411,25 +1434,34 @@ class _AppTile extends StatelessWidget {
 
   Color get _statusColor {
     switch (app.status) {
-      case AppStatus.active:  return const Color(0xFF059669);
-      case AppStatus.full:    return const Color(0xFF6366F1);
-      case AppStatus.expired: return const Color(0xFFDC2626);
+      case AppStatus.active:
+        return const Color(0xFF059669);
+      case AppStatus.full:
+        return const Color(0xFF6366F1);
+      case AppStatus.expired:
+        return const Color(0xFFDC2626);
     }
   }
 
   List<Color> get _statusGradient {
     switch (app.status) {
-      case AppStatus.active:  return [const Color(0xFF059669), const Color(0xFF10B981)];
-      case AppStatus.full:    return [const Color(0xFF6366F1), const Color(0xFF8B5CF6)];
-      case AppStatus.expired: return [const Color(0xFFDC2626), const Color(0xFFEF4444)];
+      case AppStatus.active:
+        return [const Color(0xFF059669), const Color(0xFF10B981)];
+      case AppStatus.full:
+        return [const Color(0xFF6366F1), const Color(0xFF8B5CF6)];
+      case AppStatus.expired:
+        return [const Color(0xFFDC2626), const Color(0xFFEF4444)];
     }
   }
 
   String get _statusLabel {
     switch (app.status) {
-      case AppStatus.active:  return TKeys.myAppsStatusActive.tr;
-      case AppStatus.full:    return TKeys.myAppsStatusCompleted.tr;
-      case AppStatus.expired: return TKeys.myAppsStatusExpired.tr;
+      case AppStatus.active:
+        return TKeys.myAppsStatusActive.tr;
+      case AppStatus.full:
+        return TKeys.myAppsStatusCompleted.tr;
+      case AppStatus.expired:
+        return TKeys.myAppsStatusExpired.tr;
     }
   }
 
@@ -1449,9 +1481,7 @@ class _AppTile extends StatelessWidget {
           color: isDark ? AppColors.cardDark : Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: isDark
-                ? AppColors.borderDark
-                : sc.withValues(alpha: 0.12),
+            color: isDark ? AppColors.borderDark : sc.withValues(alpha: 0.12),
             width: isDark ? 1 : 1.2,
           ),
           boxShadow: [
@@ -1474,9 +1504,7 @@ class _AppTile extends StatelessWidget {
             // ── Gradient top accent bar (clipped by parent) ──────
             Container(
               height: 4,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: sg),
-              ),
+              decoration: BoxDecoration(gradient: LinearGradient(colors: sg)),
             ),
 
             // ── Card body ────────────────────────────────────────
@@ -1560,8 +1588,9 @@ class _AppTile extends StatelessWidget {
                                   ),
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: sg.map((c) =>
-                                          c.withValues(alpha: 0.14)).toList(),
+                                      colors: sg
+                                          .map((c) => c.withValues(alpha: 0.14))
+                                          .toList(),
                                     ),
                                     borderRadius: BorderRadius.circular(7),
                                   ),
@@ -1602,8 +1631,9 @@ class _AppTile extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: sg.map((c) =>
-                                c.withValues(alpha: 0.14)).toList(),
+                            colors: sg
+                                .map((c) => c.withValues(alpha: 0.14))
+                                .toList(),
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -1710,8 +1740,9 @@ class _AppTile extends StatelessWidget {
                         height: 30,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: sg.map((c) =>
-                                c.withValues(alpha: 0.12)).toList(),
+                            colors: sg
+                                .map((c) => c.withValues(alpha: 0.12))
+                                .toList(),
                           ),
                           borderRadius: BorderRadius.circular(9),
                         ),
@@ -2092,7 +2123,10 @@ class _BrowseTile extends StatelessWidget {
                             'https://play.google.com/store/apps/details?id=${app.packageName}',
                           );
                           if (await canLaunchUrl(uri)) {
-                            launchUrl(uri, mode: LaunchMode.externalApplication);
+                            launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
                           }
                         },
                         icon: const Icon(
@@ -2109,13 +2143,13 @@ class _BrowseTile extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFF059669),
                           side: const BorderSide(color: Color(0xFF059669)),
-                          backgroundColor:
-                              const Color(0xFF059669).withValues(alpha: 0.08),
+                          backgroundColor: const Color(
+                            0xFF059669,
+                          ).withValues(alpha: 0.08),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(9),
                           ),
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
                           minimumSize: const Size(0, 34),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
@@ -2138,10 +2172,7 @@ class _BrowseTile extends StatelessWidget {
                               );
                             }
                           },
-                          icon: const Icon(
-                            Icons.group_add_outlined,
-                            size: 14,
-                          ),
+                          icon: const Icon(Icons.group_add_outlined, size: 14),
                           label: const Text(
                             'Join Group',
                             style: TextStyle(
@@ -2151,15 +2182,14 @@ class _BrowseTile extends StatelessWidget {
                           ),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF7C3AED),
-                            side:
-                                const BorderSide(color: Color(0xFF7C3AED)),
-                            backgroundColor: const Color(0xFF7C3AED)
-                                .withValues(alpha: 0.08),
+                            side: const BorderSide(color: Color(0xFF7C3AED)),
+                            backgroundColor: const Color(
+                              0xFF7C3AED,
+                            ).withValues(alpha: 0.08),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(9),
                             ),
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
                             minimumSize: const Size(0, 34),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
@@ -2196,7 +2226,9 @@ class _PendingSwapsBanner extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF6366F1).withValues(alpha: isDark ? 0.08 : 0.06),
+            color: const Color(
+              0xFF6366F1,
+            ).withValues(alpha: isDark ? 0.08 : 0.06),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -2509,10 +2541,29 @@ class _BrowseFilterSheetState extends State<_BrowseFilterSheet>
   };
 
   static const _languages = [
-    'English', 'Hindi', 'Spanish', 'French', 'German', 'Portuguese',
-    'Japanese', 'Korean', 'Arabic', 'Italian', 'Russian', 'Dutch',
-    'Turkish', 'Polish', 'Swedish', 'Chinese', 'Bengali', 'Urdu',
-    'Indonesian', 'Malay', 'Thai', 'Vietnamese', 'Filipino',
+    'English',
+    'Hindi',
+    'Spanish',
+    'French',
+    'German',
+    'Portuguese',
+    'Japanese',
+    'Korean',
+    'Arabic',
+    'Italian',
+    'Russian',
+    'Dutch',
+    'Turkish',
+    'Polish',
+    'Swedish',
+    'Chinese',
+    'Bengali',
+    'Urdu',
+    'Indonesian',
+    'Malay',
+    'Thai',
+    'Vietnamese',
+    'Filipino',
   ];
 
   static const _catIcons = <AppCategory, IconData>{
@@ -2544,7 +2595,8 @@ class _BrowseFilterSheetState extends State<_BrowseFilterSheet>
     super.initState();
     _tab = TabController(length: 3, vsync: this);
     _countrySearchCtrl.addListener(
-      () => setState(() => _countryQuery = _countrySearchCtrl.text.toLowerCase()),
+      () =>
+          setState(() => _countryQuery = _countrySearchCtrl.text.toLowerCase()),
     );
   }
 
@@ -2571,8 +2623,10 @@ class _BrowseFilterSheetState extends State<_BrowseFilterSheet>
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final sheetHeight =
-        (MediaQuery.of(context).size.height * 0.78).clamp(420.0, 640.0);
+    final sheetHeight = (MediaQuery.of(context).size.height * 0.78).clamp(
+      420.0,
+      640.0,
+    );
 
     return Container(
       height: sheetHeight + bottomInset,
@@ -2645,10 +2699,14 @@ class _BrowseFilterSheetState extends State<_BrowseFilterSheet>
                               vertical: 7,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFDC2626).withValues(alpha: 0.1),
+                              color: const Color(
+                                0xFFDC2626,
+                              ).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: const Color(0xFFDC2626).withValues(alpha: 0.25),
+                                color: const Color(
+                                  0xFFDC2626,
+                                ).withValues(alpha: 0.25),
                               ),
                             ),
                             child: const Text(
@@ -2678,9 +2736,7 @@ class _BrowseFilterSheetState extends State<_BrowseFilterSheet>
               return Container(
                 height: 42,
                 decoration: BoxDecoration(
-                  color: _isDark
-                      ? AppColors.cardDark
-                      : const Color(0xFFF1F2F6),
+                  color: _isDark ? AppColors.cardDark : const Color(0xFFF1F2F6),
                   borderRadius: BorderRadius.circular(13),
                 ),
                 child: TabBar(
@@ -2768,16 +2824,19 @@ class _BrowseFilterSheetState extends State<_BrowseFilterSheet>
               height: 52,
               child: ElevatedButton(
                 onPressed: () => Get.back(),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ).copyWith(
-                  backgroundColor: WidgetStateProperty.all(Colors.transparent),
-                  shadowColor: WidgetStateProperty.all(Colors.transparent),
-                ),
+                style:
+                    ElevatedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ).copyWith(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.transparent,
+                      ),
+                      shadowColor: WidgetStateProperty.all(Colors.transparent),
+                    ),
                 child: Ink(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
@@ -2796,7 +2855,9 @@ class _BrowseFilterSheetState extends State<_BrowseFilterSheet>
                     child: Obx(() {
                       final count = _apps.activeBrowseFilterCount;
                       return Text(
-                        count > 0 ? 'Apply Filters ($count active)' : 'Apply Filters',
+                        count > 0
+                            ? 'Apply Filters ($count active)'
+                            : 'Apply Filters',
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -2962,8 +3023,7 @@ class _CatCell extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 11,
-                fontWeight:
-                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected
                     ? const Color(0xFF6366F1)
                     : (isDark
@@ -3009,8 +3069,8 @@ class _CountryTab extends StatelessWidget {
     final filtered = query.isEmpty
         ? countries.entries.toList()
         : countries.entries
-            .where((e) => e.value.toLowerCase().contains(query))
-            .toList();
+              .where((e) => e.value.toLowerCase().contains(query))
+              .toList();
 
     return Obx(() {
       final selected = apps.browseFilterCountry.value;
@@ -3035,10 +3095,7 @@ class _CountryTab extends StatelessWidget {
                 ),
                 decoration: InputDecoration(
                   hintText: 'Search country...',
-                  hintStyle: TextStyle(
-                    fontSize: 14,
-                    color: hintColor,
-                  ),
+                  hintStyle: TextStyle(fontSize: 14, color: hintColor),
                   prefixIcon: Icon(
                     Icons.search_rounded,
                     size: 18,
@@ -3194,14 +3251,29 @@ class _LanguageTab extends StatelessWidget {
   final Color border;
 
   static const _langFlags = <String, String>{
-    'English': '🇬🇧', 'Hindi': '🇮🇳', 'Spanish': '🇪🇸',
-    'French': '🇫🇷', 'German': '🇩🇪', 'Portuguese': '🇧🇷',
-    'Japanese': '🇯🇵', 'Korean': '🇰🇷', 'Arabic': '🇸🇦',
-    'Italian': '🇮🇹', 'Russian': '🇷🇺', 'Dutch': '🇳🇱',
-    'Turkish': '🇹🇷', 'Polish': '🇵🇱', 'Swedish': '🇸🇪',
-    'Chinese': '🇨🇳', 'Bengali': '🇧🇩', 'Urdu': '🇵🇰',
-    'Indonesian': '🇮🇩', 'Malay': '🇲🇾', 'Thai': '🇹🇭',
-    'Vietnamese': '🇻🇳', 'Filipino': '🇵🇭',
+    'English': '🇬🇧',
+    'Hindi': '🇮🇳',
+    'Spanish': '🇪🇸',
+    'French': '🇫🇷',
+    'German': '🇩🇪',
+    'Portuguese': '🇧🇷',
+    'Japanese': '🇯🇵',
+    'Korean': '🇰🇷',
+    'Arabic': '🇸🇦',
+    'Italian': '🇮🇹',
+    'Russian': '🇷🇺',
+    'Dutch': '🇳🇱',
+    'Turkish': '🇹🇷',
+    'Polish': '🇵🇱',
+    'Swedish': '🇸🇪',
+    'Chinese': '🇨🇳',
+    'Bengali': '🇧🇩',
+    'Urdu': '🇵🇰',
+    'Indonesian': '🇮🇩',
+    'Malay': '🇲🇾',
+    'Thai': '🇹🇭',
+    'Vietnamese': '🇻🇳',
+    'Filipino': '🇵🇭',
   };
 
   @override
@@ -3683,7 +3755,8 @@ class _ProfileSettingsSection extends StatelessWidget {
     final uri = Uri.parse(
       'https://play.google.com/store/apps/details?id=com.testermandi.app',
     );
-    if (await canLaunchUrl(uri)) launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (await canLaunchUrl(uri))
+      launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   void _shareApp() {
@@ -3704,7 +3777,6 @@ class _ProfileSettingsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           // ── PREFERENCES ──────────────────────────────────────────
           _SettingsGroupLabel(
             label: TKeys.profileSectionPreferences.tr,
@@ -3717,39 +3789,45 @@ class _ProfileSettingsSection extends StatelessWidget {
             border: border,
             children: [
               // Theme
-              Obx(() => _SettingsTile(
-                icon: _themeIcon(settings.themeMode.value),
-                label: TKeys.profileChooseTheme.tr,
-                subtitle: _themeLabel(settings.themeMode.value),
-                color: const Color(0xFF6366F1),
-                isDark: isDark,
-                onTap: () => _showThemeSheet(context, settings),
-              )),
+              Obx(
+                () => _SettingsTile(
+                  icon: _themeIcon(settings.themeMode.value),
+                  label: TKeys.profileChooseTheme.tr,
+                  subtitle: _themeLabel(settings.themeMode.value),
+                  color: const Color(0xFF6366F1),
+                  isDark: isDark,
+                  onTap: () => _showThemeSheet(context, settings),
+                ),
+              ),
               _SettingsDivider(isDark: isDark),
               // Language
-              Obx(() => _SettingsTile(
-                icon: Icons.language_rounded,
-                label: TKeys.profileChooseLanguage.tr,
-                subtitle: _localeLabel(settings.locale.value),
-                color: const Color(0xFF10B981),
-                isDark: isDark,
-                onTap: () => _showLanguageSheet(context, settings),
-              )),
+              Obx(
+                () => _SettingsTile(
+                  icon: Icons.language_rounded,
+                  label: TKeys.profileChooseLanguage.tr,
+                  subtitle: _localeLabel(settings.locale.value),
+                  color: const Color(0xFF10B981),
+                  isDark: isDark,
+                  onTap: () => _showLanguageSheet(context, settings),
+                ),
+              ),
               _SettingsDivider(isDark: isDark),
               // Notifications
-              Obx(() => _SettingsToggleTile(
-                icon: settings.notificationsEnabled.value
-                    ? Icons.notifications_rounded
-                    : Icons.notifications_off_outlined,
-                label: TKeys.profileNotifications.tr,
-                subtitle: settings.notificationsEnabled.value
-                    ? TKeys.profileNotificationsOn.tr
-                    : TKeys.profileNotificationsOff.tr,
-                color: const Color(0xFFF59E0B),
-                isDark: isDark,
-                value: settings.notificationsEnabled.value,
-                onChanged: (_) => settings.toggleNotifications(),
-              )),
+              Obx(
+                () => _SettingsToggleTile(
+                  icon: settings.notificationsEnabled.value
+                      ? Icons.notifications_rounded
+                      : Icons.notifications_off_outlined,
+                  label: TKeys.profileNotifications.tr,
+                  subtitle: settings.notificationsEnabled.value
+                      ? TKeys.profileNotificationsOn.tr
+                      : TKeys.profileNotificationsOff.tr,
+                  color: const Color(0xFFF59E0B),
+                  isDark: isDark,
+                  value: settings.notificationsEnabled.value,
+                  onChanged: (_) => settings.toggleNotifications(),
+                ),
+              ),
             ],
           ),
 
@@ -3781,7 +3859,10 @@ class _ProfileSettingsSection extends StatelessWidget {
                 isDark: isDark,
                 onTap: _rateApp,
                 trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
@@ -3789,7 +3870,11 @@ class _ProfileSettingsSection extends StatelessWidget {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.star_rounded, size: 11, color: Color(0xFFF59E0B)),
+                      Icon(
+                        Icons.star_rounded,
+                        size: 11,
+                        color: Color(0xFFF59E0B),
+                      ),
                       SizedBox(width: 3),
                       Text(
                         '5.0',
@@ -3948,14 +4033,13 @@ class _SettingsTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (trailing != null) ...[
-                trailing!,
-                const SizedBox(width: 8),
-              ],
+              if (trailing != null) ...[trailing!, const SizedBox(width: 8)],
               Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                color: isDark
+                    ? AppColors.textHintDark
+                    : AppColors.textHintLight,
               ),
             ],
           ),
@@ -4076,9 +4160,21 @@ class _ThemeSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final bg = isDark ? AppColors.backgroundDark : Colors.white;
     final options = [
-      (key: 'light', icon: Icons.light_mode_rounded, color: const Color(0xFFF59E0B)),
-      (key: 'dark', icon: Icons.dark_mode_rounded, color: const Color(0xFF6366F1)),
-      (key: 'system', icon: Icons.brightness_auto_rounded, color: const Color(0xFF10B981)),
+      (
+        key: 'light',
+        icon: Icons.light_mode_rounded,
+        color: const Color(0xFFF59E0B),
+      ),
+      (
+        key: 'dark',
+        icon: Icons.dark_mode_rounded,
+        color: const Color(0xFF6366F1),
+      ),
+      (
+        key: 'system',
+        icon: Icons.brightness_auto_rounded,
+        color: const Color(0xFF10B981),
+      ),
     ];
 
     return Container(
@@ -4091,7 +4187,8 @@ class _ThemeSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 36, height: 4,
+            width: 36,
+            height: 4,
             decoration: BoxDecoration(
               color: isDark ? AppColors.borderDark : AppColors.borderLight,
               borderRadius: BorderRadius.circular(2),
@@ -4101,12 +4198,17 @@ class _ThemeSheet extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 38, height: 38,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(11),
                 ),
-                child: const Icon(Icons.palette_rounded, color: AppColors.primary, size: 19),
+                child: const Icon(
+                  Icons.palette_rounded,
+                  color: AppColors.primary,
+                  size: 19,
+                ),
               ),
               const SizedBox(width: 12),
               Column(
@@ -4117,7 +4219,9 @@ class _ThemeSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -4125,7 +4229,9 @@ class _ThemeSheet extends StatelessWidget {
                     'Choose how TesterMandi looks',
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                      color: isDark
+                          ? AppColors.textHintDark
+                          : AppColors.textHintLight,
                     ),
                   ),
                 ],
@@ -4133,71 +4239,94 @@ class _ThemeSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 22),
-          Obx(() => Column(
-            children: options.map((o) {
-              final selected = settings.themeMode.value == o.key;
-              final label = o.key == 'light'
-                  ? TKeys.themeLight.tr
-                  : o.key == 'dark'
-                      ? TKeys.themeDark.tr
-                      : TKeys.themeSystem.tr;
-              return GestureDetector(
-                onTap: () {
-                  settings.setTheme(o.key);
-                  Get.back();
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? o.color.withValues(alpha: isDark ? 0.18 : 0.08)
-                        : (isDark ? AppColors.cardDark : AppColors.backgroundLight),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: selected ? o.color : (isDark ? AppColors.borderDark : AppColors.borderLight),
-                      width: selected ? 1.5 : 1,
+          Obx(
+            () => Column(
+              children: options.map((o) {
+                final selected = settings.themeMode.value == o.key;
+                final label = o.key == 'light'
+                    ? TKeys.themeLight.tr
+                    : o.key == 'dark'
+                    ? TKeys.themeDark.tr
+                    : TKeys.themeSystem.tr;
+                return GestureDetector(
+                  onTap: () {
+                    settings.setTheme(o.key);
+                    Get.back();
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? o.color.withValues(alpha: isDark ? 0.18 : 0.08)
+                          : (isDark
+                                ? AppColors.cardDark
+                                : AppColors.backgroundLight),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: selected
+                            ? o.color
+                            : (isDark
+                                  ? AppColors.borderDark
+                                  : AppColors.borderLight),
+                        width: selected ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: o.color.withValues(
+                              alpha: selected ? 0.18 : 0.1,
+                            ),
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          child: Icon(o.icon, size: 18, color: o.color),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: selected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: selected
+                                  ? o.color
+                                  : (isDark
+                                        ? AppColors.textPrimaryDark
+                                        : AppColors.textPrimaryLight),
+                            ),
+                          ),
+                        ),
+                        if (selected)
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: o.color,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              color: Colors.white,
+                              size: 13,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 38, height: 38,
-                        decoration: BoxDecoration(
-                          color: o.color.withValues(alpha: selected ? 0.18 : 0.1),
-                          borderRadius: BorderRadius.circular(11),
-                        ),
-                        child: Icon(o.icon, size: 18, color: o.color),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                            color: selected
-                                ? o.color
-                                : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
-                          ),
-                        ),
-                      ),
-                      if (selected)
-                        Container(
-                          width: 22, height: 22,
-                          decoration: BoxDecoration(
-                            color: o.color,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.check_rounded, color: Colors.white, size: 13),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          )),
+                );
+              }).toList(),
+            ),
+          ),
         ],
       ),
     );
@@ -4230,7 +4359,8 @@ class _LanguageSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 36, height: 4,
+            width: 36,
+            height: 4,
             decoration: BoxDecoration(
               color: isDark ? AppColors.borderDark : AppColors.borderLight,
               borderRadius: BorderRadius.circular(2),
@@ -4240,12 +4370,17 @@ class _LanguageSheet extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 38, height: 38,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(11),
                 ),
-                child: const Icon(Icons.language_rounded, color: Color(0xFF10B981), size: 19),
+                child: const Icon(
+                  Icons.language_rounded,
+                  color: Color(0xFF10B981),
+                  size: 19,
+                ),
               ),
               const SizedBox(width: 12),
               Column(
@@ -4256,7 +4391,9 @@ class _LanguageSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
-                      color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      color: isDark
+                          ? AppColors.textPrimaryDark
+                          : AppColors.textPrimaryLight,
                       letterSpacing: -0.3,
                     ),
                   ),
@@ -4264,7 +4401,9 @@ class _LanguageSheet extends StatelessWidget {
                     TKeys.langSelectSubtitle.tr,
                     style: TextStyle(
                       fontSize: 12,
-                      color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                      color: isDark
+                          ? AppColors.textHintDark
+                          : AppColors.textHintLight,
                     ),
                   ),
                 ],
@@ -4272,86 +4411,118 @@ class _LanguageSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 22),
-          Obx(() => Column(
-            children: langs.map((l) {
-              final selected = settings.locale.value == l.code;
-              return GestureDetector(
-                onTap: () {
-                  settings.setLocale(l.code);
-                  Get.back();
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.08)
-                        : (isDark ? AppColors.cardDark : AppColors.backgroundLight),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: selected ? AppColors.primary : (isDark ? AppColors.borderDark : AppColors.borderLight),
-                      width: selected ? 1.5 : 1,
+          Obx(
+            () => Column(
+              children: langs.map((l) {
+                final selected = settings.locale.value == l.code;
+                return GestureDetector(
+                  onTap: () {
+                    settings.setLocale(l.code);
+                    Get.back();
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.primary.withValues(
+                              alpha: isDark ? 0.18 : 0.08,
+                            )
+                          : (isDark
+                                ? AppColors.cardDark
+                                : AppColors.backgroundLight),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: selected
+                            ? AppColors.primary
+                            : (isDark
+                                  ? AppColors.borderDark
+                                  : AppColors.borderLight),
+                        width: selected ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // Flag circle
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: selected
+                                ? AppColors.primary.withValues(alpha: 0.12)
+                                : (isDark
+                                      ? AppColors.cardDarkElevated
+                                      : AppColors.backgroundLight),
+                            border: Border.all(
+                              color: selected
+                                  ? AppColors.primary.withValues(alpha: 0.3)
+                                  : Colors.transparent,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              l.flag,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l.native,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: selected
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
+                                  color: selected
+                                      ? AppColors.primary
+                                      : (isDark
+                                            ? AppColors.textPrimaryDark
+                                            : AppColors.textPrimaryLight),
+                                ),
+                              ),
+                              Text(
+                                l.name,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppColors.textHintDark
+                                      : AppColors.textHintLight,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (selected)
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check_rounded,
+                              color: Colors.white,
+                              size: 13,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      // Flag circle
-                      Container(
-                        width: 40, height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: selected
-                              ? AppColors.primary.withValues(alpha: 0.12)
-                              : (isDark ? AppColors.cardDarkElevated : AppColors.backgroundLight),
-                          border: Border.all(
-                            color: selected ? AppColors.primary.withValues(alpha: 0.3) : Colors.transparent,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(l.flag, style: const TextStyle(fontSize: 20)),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l.native,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                                color: selected
-                                    ? AppColors.primary
-                                    : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
-                              ),
-                            ),
-                            Text(
-                              l.name,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (selected)
-                        Container(
-                          width: 22, height: 22,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.check_rounded, color: Colors.white, size: 13),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          )),
+                );
+              }).toList(),
+            ),
+          ),
         ],
       ),
     );
@@ -4383,9 +4554,7 @@ class _ProfileLogoutSection extends StatelessWidget {
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: _logoutColor.withValues(alpha: 0.25),
-              ),
+              border: Border.all(color: _logoutColor.withValues(alpha: 0.25)),
               boxShadow: [
                 BoxShadow(
                   color: _logoutColor.withValues(alpha: isDark ? 0.06 : 0.04),
@@ -4402,7 +4571,10 @@ class _ProfileLogoutSection extends StatelessWidget {
                 splashColor: _logoutColor.withValues(alpha: 0.06),
                 highlightColor: _logoutColor.withValues(alpha: 0.03),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 13,
+                  ),
                   child: Row(
                     children: [
                       Container(
@@ -4449,7 +4621,8 @@ class _ProfileLogoutSection extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 18, height: 18,
+                      width: 18,
+                      height: 18,
                       decoration: BoxDecoration(
                         gradient: AppColors.primaryGradient,
                         borderRadius: BorderRadius.circular(5),
@@ -4471,7 +4644,9 @@ class _ProfileLogoutSection extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
-                        color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                        color: isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHintLight,
                       ),
                     ),
                   ],
@@ -4481,7 +4656,9 @@ class _ProfileLogoutSection extends StatelessWidget {
                   TKeys.aboutMadeWith.tr,
                   style: TextStyle(
                     fontSize: 10,
-                    color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                    color: isDark
+                        ? AppColors.textHintDark
+                        : AppColors.textHintLight,
                   ),
                 ),
               ],
@@ -5037,14 +5214,14 @@ class _GlassStatShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        _tile(),
-        const _GlassDivider(),
-        _tile(),
-        const _GlassDivider(),
-        _tile(),
-      ],
-    )
+          children: [
+            _tile(),
+            const _GlassDivider(),
+            _tile(),
+            const _GlassDivider(),
+            _tile(),
+          ],
+        )
         .animate(onPlay: (ctrl) => ctrl.repeat(reverse: true))
         .fade(begin: 0.3, end: 0.7, duration: 900.ms, curve: Curves.easeInOut);
   }
@@ -5575,18 +5752,21 @@ class _CompactCardShimmer extends StatelessWidget {
           // ── 14-dot tracker — mirrors _MiniDotTracker ──
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(14, (_) => Expanded(
-              child: Center(
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+            children: List.generate(
+              14,
+              (_) => Expanded(
+                child: Center(
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
                   ),
                 ),
               ),
-            )),
+            ),
           ),
           const SizedBox(height: 12),
           // ── action button ──
@@ -5681,7 +5861,8 @@ class _ChatTabState extends State<_ChatTab> {
                     if (unread == 0) return const SizedBox.shrink();
                     return Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 7,
+                        horizontal: 12,
+                        vertical: 7,
                       ),
                       decoration: BoxDecoration(
                         gradient: AppColors.primaryGradient,
@@ -5772,8 +5953,7 @@ class _ChatTabState extends State<_ChatTab> {
                             )
                           : null,
                       border: InputBorder.none,
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                       isDense: true,
                     ),
                   ),
@@ -5802,10 +5982,9 @@ class _ChatTabState extends State<_ChatTab> {
             final rooms = _query.isEmpty
                 ? all
                 : all.where((r) {
-                    final name =
-                        r.otherUserName(myUid).toLowerCase();
-                    final apps =
-                        '${r.fromAppName} ${r.toAppName}'.toLowerCase();
+                    final name = r.otherUserName(myUid).toLowerCase();
+                    final apps = '${r.fromAppName} ${r.toAppName}'
+                        .toLowerCase();
                     return name.contains(_query) || apps.contains(_query);
                   }).toList();
 
@@ -5884,7 +6063,13 @@ class _ChatRoomTile extends StatelessWidget {
     final myUid = Get.find<AuthController>().currentUser.value?.uid ?? '';
     final otherName = room.otherUserName(myUid);
     final initials = otherName.isNotEmpty
-        ? otherName.trim().split(' ').take(2).map((w) => w[0]).join().toUpperCase()
+        ? otherName
+              .trim()
+              .split(' ')
+              .take(2)
+              .map((w) => w[0])
+              .join()
+              .toUpperCase()
         : '?';
     final unread = room.myUnread(myUid);
     final hasUnread = unread > 0;
@@ -6035,7 +6220,8 @@ class _ChatRoomTile extends StatelessWidget {
                     // Swap pair pill
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4,
+                        horizontal: 8,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: isDark
@@ -6178,7 +6364,9 @@ class _NoSearchResults extends StatelessWidget {
               child: Icon(
                 Icons.search_off_rounded,
                 size: 30,
-                color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                color: isDark
+                    ? AppColors.textHintDark
+                    : AppColors.textHintLight,
               ),
             ),
             const SizedBox(height: 16),
@@ -6206,8 +6394,10 @@ class _NoSearchResults extends StatelessWidget {
             GestureDetector(
               onTap: onClear,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   gradient: AppColors.primaryGradient,
                   borderRadius: BorderRadius.circular(12),
@@ -6363,7 +6553,11 @@ class _EmptyChatRooms extends StatelessWidget {
 }
 
 class _ChatHowStep extends StatelessWidget {
-  const _ChatHowStep({required this.icon, required this.label, required this.isDark});
+  const _ChatHowStep({
+    required this.icon,
+    required this.label,
+    required this.isDark,
+  });
   final IconData icon;
   final String label;
   final bool isDark;
@@ -6388,7 +6582,9 @@ class _ChatHowStep extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w600,
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight,
           ),
         ),
       ],
@@ -6480,7 +6676,9 @@ class _CompactTestCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: accentColor.withValues(
-              alpha: isApprovedToday || isPendingToday || isApproaching ? 0.5 : 0.15,
+              alpha: isApprovedToday || isPendingToday || isApproaching
+                  ? 0.5
+                  : 0.15,
             ),
             width: 1.5,
           ),
@@ -6501,7 +6699,11 @@ class _CompactTestCard extends StatelessWidget {
               // ── App icon + name + day label ──
               Row(
                 children: [
-                  _AppIcon(iconUrl: participation.iconUrl, size: 38, radius: 10),
+                  _AppIcon(
+                    iconUrl: participation.iconUrl,
+                    size: 38,
+                    radius: 10,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -6547,11 +6749,16 @@ class _CompactTestCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: warningColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: warningColor.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: warningColor.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -6565,9 +6772,7 @@ class _CompactTestCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        daysLeft <= 1
-                            ? 'Last day!'
-                            : '$daysLeft days left',
+                        daysLeft <= 1 ? 'Last day!' : '$daysLeft days left',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
@@ -6633,7 +6838,10 @@ class _CompactTestCard extends StatelessWidget {
 // ── Deactivated Test Card (horizontal dashboard scroll) ────────────────────
 
 class _DeactivatedTestCard extends StatelessWidget {
-  const _DeactivatedTestCard({required this.participation, required this.isDark});
+  const _DeactivatedTestCard({
+    required this.participation,
+    required this.isDark,
+  });
   final TestParticipation participation;
   final bool isDark;
 
@@ -6641,8 +6849,9 @@ class _DeactivatedTestCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final testing = Get.find<TestingController>();
     final daysLeft = participation.daysUntilCleanup;
-    final accentColor =
-        daysLeft <= 3 ? const Color(0xFFDC2626) : const Color(0xFFF59E0B);
+    final accentColor = daysLeft <= 3
+        ? const Color(0xFFDC2626)
+        : const Color(0xFFF59E0B);
 
     return Container(
       width: 200,
@@ -6811,7 +7020,9 @@ class _CompactThemCard extends StatelessWidget {
           color: isDark ? AppColors.cardDark : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: accentColor.withValues(alpha: hasPendingToday || isApproaching ? 0.6 : 0.2),
+            color: accentColor.withValues(
+              alpha: hasPendingToday || isApproaching ? 0.6 : 0.2,
+            ),
             width: hasPendingToday || isApproaching ? 1.5 : 1,
           ),
           boxShadow: [
@@ -6831,7 +7042,11 @@ class _CompactThemCard extends StatelessWidget {
               // ── App icon + name + day label ──
               Row(
                 children: [
-                  _AppIcon(iconUrl: participation.iconUrl, size: 38, radius: 10),
+                  _AppIcon(
+                    iconUrl: participation.iconUrl,
+                    size: 38,
+                    radius: 10,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -6920,11 +7135,16 @@ class _CompactThemCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: warningColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: warningColor.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: warningColor.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -7383,8 +7603,8 @@ class _ProofReviewSheetState extends State<_ProofReviewSheet> {
                                 onPressed: busy
                                     ? null
                                     : () => ctrl.rejectProof(
-                                          widget.participationId,
-                                        ),
+                                        widget.participationId,
+                                      ),
                                 icon: const Icon(Icons.close_rounded, size: 16),
                                 label: const Text('Reject'),
                                 style: OutlinedButton.styleFrom(
@@ -7411,8 +7631,8 @@ class _ProofReviewSheetState extends State<_ProofReviewSheet> {
                                 onPressed: busy
                                     ? null
                                     : () => ctrl.approveProof(
-                                          widget.participationId,
-                                        ),
+                                        widget.participationId,
+                                      ),
                                 icon: busy
                                     ? const SizedBox(
                                         width: 14,
@@ -7627,9 +7847,7 @@ class _NotificationBell extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(13),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
             ),
             child: const Icon(
               Icons.notifications_outlined,

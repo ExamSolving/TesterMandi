@@ -40,6 +40,20 @@ class StorageService {
   Future<void> setOnboardingDone() =>
       _prefs.setBool(AppConstants.onboardingDone, true);
 
+  // ── Update remind-later ────────────────────────────────
+  static const _updateRemindKey = 'update_remind_later_ms';
+
+  int get updateRemindLaterMs => _prefs.getInt(_updateRemindKey) ?? 0;
+  Future<void> saveUpdateRemindLater() =>
+      _prefs.setInt(_updateRemindKey, DateTime.now().millisecondsSinceEpoch);
+  bool get isUpdateSnoozed {
+    final saved = updateRemindLaterMs;
+    if (saved == 0) return false;
+    final diff = DateTime.now().millisecondsSinceEpoch - saved;
+    return diff < const Duration(hours: 24).inMilliseconds;
+  }
+  Future<void> clearUpdateSnooze() => _prefs.remove(_updateRemindKey);
+
   Future<void> clearUserSession() async {
     await _prefs.remove(AppConstants.cachedUserId);
     await _prefs.remove(AppConstants.cachedUserRole);
