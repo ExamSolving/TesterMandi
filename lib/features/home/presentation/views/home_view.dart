@@ -626,10 +626,10 @@ class _DashboardTab extends StatelessWidget {
           ),
           if (myParticipations.isNotEmpty)
             SizedBox(
-              height: 176,
+              height: 155,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                 itemCount: myParticipations.length,
                 itemBuilder: (_, i) => _CompactTestCard(
                   participation: myParticipations[i],
@@ -688,10 +688,10 @@ class _DashboardTab extends StatelessWidget {
           ),
           if (myTesters.isNotEmpty)
             SizedBox(
-              height: 206,
+              height: 155,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                 itemCount: myTesters.length,
                 itemBuilder: (_, i) => _CompactThemCard(
                   participation: myTesters[i],
@@ -740,7 +740,7 @@ class _DashSectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 22, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -6831,52 +6831,49 @@ class _CompactTestCard extends StatelessWidget {
       final isApproaching = participation.isApproachingExpiry;
       final daysLeft = participation.daysRemaining;
 
-      final Color warningColor = daysLeft <= 2
+      final warningColor = daysLeft <= 2
           ? const Color(0xFFDC2626)
           : const Color(0xFFF59E0B);
 
-      Color accentColor = AppColors.primary;
-      if (isApprovedToday) accentColor = const Color(0xFF059669);
-      if (isPendingToday) accentColor = const Color(0xFFF59E0B);
-      if (isApproaching && !isApprovedToday) accentColor = warningColor;
+      Color accent = AppColors.primary;
+      if (isApprovedToday) {
+        accent = const Color(0xFF059669);
+      } else if (isPendingToday) {
+        accent = const Color(0xFFF59E0B);
+      } else if (isApproaching) {
+        accent = warningColor;
+      }
+
+      final progress = approved.length / 14.0;
+      final textPrimary = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+      final textHint = isDark ? AppColors.textHintDark : AppColors.textHintLight;
 
       return Container(
-        width: 200,
+        width: 220,
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
           color: isDark ? AppColors.cardDark : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: accentColor.withValues(
-              alpha: isApprovedToday || isPendingToday || isApproaching
-                  ? 0.5
-                  : 0.15,
-            ),
-            width: 1.5,
-          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: accent.withValues(alpha: 0.22), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withValues(alpha: isDark ? 0.12 : 0.07),
-              blurRadius: 12,
+              color: accent.withValues(alpha: isDark ? 0.10 : 0.07),
+              blurRadius: 14,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ── App icon + name + day label ──
+              // ── App icon + name + day badge ──
               Row(
                 children: [
-                  _AppIcon(
-                    iconUrl: participation.iconUrl,
-                    size: 38,
-                    radius: 10,
-                  ),
-                  const SizedBox(width: 10),
+                  _AppIcon(iconUrl: participation.iconUrl, size: 36, radius: 10),
+                  const SizedBox(width: 9),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -6886,20 +6883,48 @@ class _CompactTestCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimaryLight,
+                            color: textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Day $_currentDay of 14',
+                          'by ${participation.appOwnerName}',
+                          style: TextStyle(fontSize: 10, color: textHint),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.13),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isApproaching) ...[
+                          Icon(
+                            daysLeft <= 2
+                                ? Icons.warning_amber_rounded
+                                : Icons.timer_rounded,
+                            size: 9,
+                            color: accent,
+                          ),
+                          const SizedBox(width: 3),
+                        ],
+                        Text(
+                          'D$_currentDay',
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: accentColor,
+                            fontWeight: FontWeight.w800,
+                            color: accent,
                           ),
                         ),
                       ],
@@ -6908,53 +6933,40 @@ class _CompactTestCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
+              // ── Progress bar ──
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 5,
+                        backgroundColor: accent.withValues(alpha: 0.12),
+                        valueColor: AlwaysStoppedAnimation<Color>(accent),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 7),
+                  Text(
+                    '${approved.length}/14',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: accent,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
               // ── 14-day dot tracker ──
               _MiniDotTracker(
                 approvedDays: approved,
                 pendingDays: pending,
                 currentDay: _currentDay,
-                activeColor: AppColors.primary,
+                activeColor: accent,
                 isDark: isDark,
               ),
-              // ── Expiry warning banner ──
-              if (isApproaching) ...[
-                const SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: warningColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: warningColor.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        daysLeft <= 2
-                            ? Icons.warning_amber_rounded
-                            : Icons.timer_rounded,
-                        size: 11,
-                        color: warningColor,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        daysLeft <= 1 ? 'Last day!' : '$daysLeft days left',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: warningColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
               const SizedBox(height: 10),
               // ── Status / action ──
               if (isApprovedToday)
@@ -6972,30 +6984,41 @@ class _CompactTestCard extends StatelessWidget {
                   isDark: isDark,
                 )
               else
-                SizedBox(
-                  width: double.infinity,
-                  height: 34,
-                  child: ElevatedButton.icon(
-                    onPressed: () => Get.to(
-                      () => SubmitProofView(participation: participation),
+                GestureDetector(
+                  onTap: () => Get.to(
+                      () => SubmitProofView(participation: participation)),
+                  child: Container(
+                    width: double.infinity,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isApproaching
+                            ? [warningColor, warningColor.withValues(alpha: 0.75)]
+                            : [AppColors.primary, const Color(0xFF7C3AED)],
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: accent.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    icon: const Icon(Icons.upload_rounded, size: 14),
-                    label: const Text('Submit Proof'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isApproaching
-                          ? warningColor
-                          : AppColors.primary,
-                      foregroundColor: Colors.white,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
-                      padding: EdgeInsets.zero,
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.upload_rounded, size: 14, color: Colors.white),
+                        SizedBox(width: 5),
+                        Text(
+                          'Submit Proof',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -7160,6 +7183,19 @@ class _CompactThemCard extends StatelessWidget {
 
   int get _currentDay => participation.daysElapsed.clamp(1, 14);
 
+  void _openReviewSheet(BuildContext context, ProofsController proofs) {
+    Get.bottomSheet(
+      _ProofReviewSheet(
+        participationId: participation.id,
+        appName: participation.appName,
+        testerName: participation.testerName,
+        isDark: isDark,
+      ),
+      isScrollControlled: true,
+      ignoreSafeArea: false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final proofs = Get.find<ProofsController>();
@@ -7172,77 +7208,161 @@ class _CompactThemCard extends StatelessWidget {
       final isReminding = proofs.remindingId.value == participation.id;
       final isApproaching = participation.isApproachingExpiry;
       final daysLeft = participation.daysRemaining;
+      final busy = isApproving || isReminding;
 
-      final Color warningColor = daysLeft <= 2
+      final warningColor = daysLeft <= 2
           ? const Color(0xFFDC2626)
           : const Color(0xFFF59E0B);
 
-      Color accentColor = hasPendingToday
-          ? const Color(0xFFF59E0B)
-          : isApprovedToday
-          ? const Color(0xFF059669)
+      const indigo = Color(0xFF6366F1);
+      Color accent;
+      if (hasPendingToday) {
+        accent = const Color(0xFFF59E0B);
+      } else if (isApprovedToday) {
+        accent = const Color(0xFF059669);
+      } else if (isApproaching) {
+        accent = warningColor;
+      } else {
+        accent = indigo;
+      }
+
+      final progress = approved.length / 14.0;
+      final testerInitial = participation.testerName.isNotEmpty
+          ? participation.testerName[0].toUpperCase()
+          : 'T';
+      final testerName = participation.testerName.isNotEmpty
+          ? participation.testerName
+          : 'Tester';
+      final textPrimary =
+          isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+      final textHint =
+          isDark ? AppColors.textHintDark : AppColors.textHintLight;
+
+      // Button label & icon
+      final String btnLabel = busy
+          ? (isApproving ? 'Approving…' : 'Sending…')
+          : hasPendingToday
+              ? 'Review & Approve'
+              : 'Remind Tester';
+      final IconData btnIcon = hasPendingToday
+          ? Icons.rate_review_rounded
+          : Icons.notifications_rounded;
+      final List<Color> btnGradient = hasPendingToday
+          ? [const Color(0xFF059669), const Color(0xFF10B981)]
           : isApproaching
-          ? warningColor
-          : const Color(0xFF6366F1);
+              ? [warningColor, warningColor.withValues(alpha: 0.75)]
+              : [indigo, const Color(0xFF8B5CF6)];
 
       return Container(
-        width: 200,
+        width: 220,
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
           color: isDark ? AppColors.cardDark : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: accentColor.withValues(
-              alpha: hasPendingToday || isApproaching ? 0.6 : 0.2,
-            ),
-            width: hasPendingToday || isApproaching ? 1.5 : 1,
-          ),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: accent.withValues(alpha: 0.22), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: accentColor.withValues(alpha: isDark ? 0.12 : 0.07),
-              blurRadius: 12,
+              color: accent.withValues(alpha: isDark ? 0.10 : 0.07),
+              blurRadius: 14,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ── App icon + name + day label ──
+              // ── Tester avatar + name + app + day badge ──
               Row(
                 children: [
-                  _AppIcon(
-                    iconUrl: participation.iconUrl,
-                    size: 38,
-                    radius: 10,
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [indigo, Color(0xFF8B5CF6)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        testerInitial,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 9),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          participation.appName,
+                          testerName,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: isDark
-                                ? AppColors.textPrimaryDark
-                                : AppColors.textPrimaryLight,
+                            color: textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            _AppIcon(
+                                iconUrl: participation.iconUrl,
+                                size: 13,
+                                radius: 3),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                participation.appName,
+                                style:
+                                    TextStyle(fontSize: 10, color: textHint),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.13),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isApproaching) ...[
+                          Icon(
+                            daysLeft <= 2
+                                ? Icons.warning_amber_rounded
+                                : Icons.timer_rounded,
+                            size: 9,
+                            color: accent,
+                          ),
+                          const SizedBox(width: 3),
+                        ],
                         Text(
-                          'Day $_currentDay of 14',
+                          'D$_currentDay',
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: accentColor,
+                            fontWeight: FontWeight.w800,
+                            color: accent,
                           ),
                         ),
                       ],
@@ -7250,48 +7370,31 @@ class _CompactThemCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              // ── Tester chip ──
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6366F1).withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircleAvatar(
-                      radius: 8,
-                      backgroundColor: const Color(0xFF6366F1),
-                      child: Text(
-                        participation.testerName.isNotEmpty
-                            ? participation.testerName[0].toUpperCase()
-                            : 'T',
-                        style: const TextStyle(
-                          fontSize: 8,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
+              const SizedBox(height: 10),
+              // ── Progress bar ──
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 5,
+                        backgroundColor: accent.withValues(alpha: 0.12),
+                        valueColor: AlwaysStoppedAnimation<Color>(accent),
                       ),
                     ),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        participation.testerName.isNotEmpty
-                            ? participation.testerName
-                            : 'Tester',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF6366F1),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                  ),
+                  const SizedBox(width: 7),
+                  Text(
+                    '${approved.length}/14',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: accent,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               // ── 14-day dot tracker ──
@@ -7299,135 +7402,85 @@ class _CompactThemCard extends StatelessWidget {
                 approvedDays: approved,
                 pendingDays: pending,
                 currentDay: _currentDay,
-                activeColor: const Color(0xFF6366F1),
+                activeColor: accent,
                 isDark: isDark,
               ),
-              // ── Expiry warning ──
-              if (isApproaching) ...[
-                const SizedBox(height: 6),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: warningColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: warningColor.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        daysLeft <= 2
-                            ? Icons.warning_amber_rounded
-                            : Icons.timer_rounded,
-                        size: 10,
-                        color: warningColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        daysLeft <= 1
-                            ? 'Window ends today!'
-                            : '$daysLeft days left — ${participation.proofsSubmitted}/14 proofs',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: warningColor,
+              const SizedBox(height: 10),
+              // ── Action ──
+              if (isApprovedToday)
+                    _StatusChip(
+                      icon: Icons.verified_rounded,
+                      label: 'Done Today',
+                      color: const Color(0xFF059669),
+                      isDark: isDark,
+                    )
+                  else
+                    GestureDetector(
+                      onTap: busy
+                          ? null
+                          : hasPendingToday
+                              ? () => _openReviewSheet(context, proofs)
+                              : () => proofs.sendReminderToTester(
+                                    participationId: participation.id,
+                                    testerId: participation.testerId,
+                                    appName: participation.appName,
+                                  ),
+                      child: Container(
+                        width: double.infinity,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          gradient: busy
+                              ? null
+                              : LinearGradient(colors: btnGradient),
+                          color: busy
+                              ? (isDark
+                                  ? AppColors.borderDark
+                                  : AppColors.borderLight)
+                              : null,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: busy
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: btnGradient.first
+                                        .withValues(alpha: 0.35),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (busy)
+                              const SizedBox(
+                                width: 13,
+                                height: 13,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            else
+                              Icon(btnIcon, size: 14, color: Colors.white),
+                            const SizedBox(width: 5),
+                            Text(
+                              btnLabel,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ],
-              const SizedBox(height: 10),
-              // ── Action button ──
-              if (isApprovedToday)
-                _StatusChip(
-                  icon: Icons.verified_rounded,
-                  label: 'Done Today',
-                  color: const Color(0xFF059669),
-                  isDark: isDark,
-                )
-              else
-                SizedBox(
-                  width: double.infinity,
-                  height: 34,
-                  child: ElevatedButton.icon(
-                    onPressed: (isApproving || isReminding)
-                        ? null
-                        : hasPendingToday
-                        ? () => _openReviewSheet(context, proofs)
-                        : () => proofs.sendReminderToTester(
-                            participationId: participation.id,
-                            testerId: participation.testerId,
-                            appName: participation.appName,
-                          ),
-                    icon: (isApproving || isReminding)
-                        ? const SizedBox(
-                            width: 12,
-                            height: 12,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Icon(
-                            hasPendingToday
-                                ? Icons.rate_review_rounded
-                                : Icons.notifications_rounded,
-                            size: 14,
-                          ),
-                    label: Text(
-                      isApproving
-                          ? 'Processing…'
-                          : isReminding
-                          ? 'Sending…'
-                          : hasPendingToday
-                          ? 'Review & Approve'
-                          : 'Remind',
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: hasPendingToday
-                          ? const Color(0xFF059669)
-                          : isApproaching
-                          ? warningColor
-                          : const Color(0xFF6366F1),
-                      foregroundColor: Colors.white,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      textStyle: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
-                      padding: EdgeInsets.zero,
-                    ),
-                  ),
-                ),
             ],
           ),
         ),
       );
     });
-  }
-
-  void _openReviewSheet(BuildContext context, ProofsController proofs) {
-    Get.bottomSheet(
-      _ProofReviewSheet(
-        participationId: participation.id,
-        appName: participation.appName,
-        testerName: participation.testerName,
-        isDark: isDark,
-      ),
-      isScrollControlled: true,
-      ignoreSafeArea: false,
-    );
   }
 }
 
