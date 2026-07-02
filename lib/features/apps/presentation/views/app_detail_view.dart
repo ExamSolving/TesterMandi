@@ -1383,6 +1383,17 @@ class _OwnerActionPanel extends StatelessWidget {
     Get.to(() => const AddAppView());
   }
 
+  Future<void> _confirmDelete() async {
+    final confirmed = await Get.dialog<bool>(
+      _DeleteConfirmDialog(app: app, isDark: isDark),
+      barrierColor: Colors.black.withValues(alpha: 0.65),
+      barrierDismissible: false,
+    );
+    if (confirmed != true) return;
+    final ok = await Get.find<AppsController>().deleteApp(app);
+    if (ok) Get.back();
+  }
+
   @override
   Widget build(BuildContext context) {
     final appsCtrl = Get.find<AppsController>();
@@ -1556,7 +1567,337 @@ class _OwnerActionPanel extends StatelessWidget {
             ),
           );
         }),
+        const SizedBox(height: 14),
+        // ── Delete listing ─────────────────────────────────────────────
+        GestureDetector(
+            onTap: _confirmDelete,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFFDC2626).withValues(alpha: 0.08)
+                    : const Color(0xFFFFF1F1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                    color: const Color(0xFFDC2626).withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDC2626).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.delete_rounded,
+                        color: Color(0xFFDC2626), size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Delete App Listing',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFDC2626),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Permanently removes app and all related data',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded,
+                      color: const Color(0xFFDC2626).withValues(alpha: 0.6),
+                      size: 20),
+                ],
+              ),
+            ),
+          ),
       ],
+    );
+  }
+}
+
+// ── Delete Confirmation Dialog ───────────────────────────────────────────────
+
+class _DeleteConfirmDialog extends StatefulWidget {
+  const _DeleteConfirmDialog({required this.app, required this.isDark});
+  final AppListing app;
+  final bool isDark;
+
+  @override
+  State<_DeleteConfirmDialog> createState() => _DeleteConfirmDialogState();
+}
+
+class _DeleteConfirmDialogState extends State<_DeleteConfirmDialog>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _anim;
+  late final Animation<double> _scale;
+  late final Animation<double> _fade;
+
+  @override
+  void initState() {
+    super.initState();
+    _anim = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 320));
+    _scale = CurvedAnimation(parent: _anim, curve: Curves.easeOutBack);
+    _fade = CurvedAnimation(parent: _anim, curve: Curves.easeOut);
+    _anim.forward();
+  }
+
+  @override
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
+
+  Future<void> _dismiss([bool result = false]) async {
+    await _anim.reverse();
+    Get.back(result: result);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    const red = Color(0xFFDC2626);
+
+    return FadeTransition(
+      opacity: _fade,
+      child: ScaleTransition(
+        scale: _scale,
+        child: Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.cardDark : Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 40,
+                    offset: const Offset(0, 12)),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── Gradient header ──────────────────────────────────────
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 28),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF7F1D1D), Color(0xFFDC2626)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.delete_forever_rounded,
+                            color: Colors.white, size: 32),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Delete App?',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.app.appName,
+                        style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── Warning body ─────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: red.withValues(alpha: isDark ? 0.12 : 0.06),
+                          borderRadius: BorderRadius.circular(12),
+                          border:
+                              Border.all(color: red.withValues(alpha: 0.2)),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning_rounded,
+                                color: red.withValues(alpha: 0.85), size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'This action is permanent and cannot be undone.',
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: red.withValues(alpha: 0.85),
+                                    height: 1.4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'The following will be permanently deleted:',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight),
+                      ),
+                      const SizedBox(height: 10),
+                      ...[
+                        (Icons.apps_rounded, 'App listing & all details'),
+                        (Icons.swap_horiz_rounded, 'All swap requests'),
+                        (Icons.people_rounded, 'All tester participations'),
+                        (Icons.photo_library_rounded, 'All proof screenshots'),
+                        (Icons.notifications_rounded, 'All related notifications'),
+                        (Icons.image_rounded, 'App icon from storage'),
+                      ].map((e) => Padding(
+                            padding: const EdgeInsets.only(bottom: 7),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: red.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(e.$1,
+                                      size: 14,
+                                      color: red.withValues(alpha: 0.7)),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  e.$2,
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: isDark
+                                          ? AppColors.textPrimaryDark
+                                          : AppColors.textPrimaryLight),
+                                ),
+                              ],
+                            ),
+                          )),
+                    ],
+                  ),
+                ),
+
+                // ── Buttons ──────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _dismiss(false),
+                          style: OutlinedButton.styleFrom(
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14)),
+                            side: BorderSide(
+                                color: isDark
+                                    ? AppColors.borderDark
+                                    : AppColors.borderLight),
+                            foregroundColor: isDark
+                                ? AppColors.textPrimaryDark
+                                : AppColors.textPrimaryLight,
+                          ),
+                          child: const Text('Cancel',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 14)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF7F1D1D), Color(0xFFDC2626)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: red.withValues(alpha: 0.4),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 5)),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => _dismiss(true),
+                              borderRadius: BorderRadius.circular(14),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.delete_forever_rounded,
+                                        color: Colors.white, size: 18),
+                                    SizedBox(width: 6),
+                                    Text('Delete',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

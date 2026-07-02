@@ -19,4 +19,10 @@ abstract class AppsRepository {
     required String ownerName,
     required String ownerId,
   });
+
+  Future<void> deleteApp({
+    required String appId,
+    required String ownerId,
+    required String packageName,
+  });
 }

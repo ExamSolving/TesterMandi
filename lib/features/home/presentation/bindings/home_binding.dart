@@ -21,7 +21,7 @@ class HomeBinding extends Bindings {
     final db = FirebaseFirestore.instance;
     final storage = FirebaseStorage.instance;
 
-    Get.lazyPut<AppsRepositoryImpl>(() => AppsRepositoryImpl(db));
+    Get.lazyPut<AppsRepositoryImpl>(() => AppsRepositoryImpl(db, storage));
     Get.lazyPut<TestingRepositoryImpl>(() => TestingRepositoryImpl(db));
     Get.lazyPut<ProofsRepositoryImpl>(() => ProofsRepositoryImpl(db, storage));
     Get.lazyPut<SwapRepositoryImpl>(() => SwapRepositoryImpl(db));

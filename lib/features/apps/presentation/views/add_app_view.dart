@@ -449,27 +449,24 @@ class _BottomNavRow extends StatelessWidget {
                             ? 'Save Changes'
                             : TKeys.addAppSubmit.tr,
                         isLoading: ctrl.isLoading.value,
-                        onPressed: ctrl.groupConfirmed.value
-                            ? () async {
-                                final name = await ctrl.submitApp();
-                                if (name != null) {
-                                  Get.back();
-                                  if (!isEditing) {
-                                    // ignore: use_build_context_synchronously
-                                    final ctx = Get.overlayContext;
-                                    if (ctx != null) {
-                                      await showModalBottomSheet(
-                                        context: ctx,
-                                        isScrollControlled: true,
-                                        backgroundColor: Colors.transparent,
-                                        builder: (_) =>
-                                            AppPostedSheet(appName: name),
-                                      );
-                                    }
-                                  }
-                                }
+                        onPressed: () async {
+                          final name = await ctrl.submitApp();
+                          if (name != null) {
+                            Get.back();
+                            if (!isEditing) {
+                              final ctx = Get.overlayContext;
+                              if (ctx != null) {
+                                await showModalBottomSheet(
+                                  context: ctx, // ignore: use_build_context_synchronously
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) =>
+                                      AppPostedSheet(appName: name),
+                                );
                               }
-                            : null,
+                            }
+                          }
+                        },
                         icon: isEditing
                             ? Icons.check_circle_rounded
                             : Icons.rocket_launch_rounded,
@@ -803,102 +800,125 @@ class _SetupStep extends StatelessWidget {
         // ── Mandatory confirmation (right below the instruction card) ─────────
         Obx(() {
           final confirmed = ctrl.groupConfirmed.value;
-          final activeBorder = const Color(0xFF059669);
+          final hasError = ctrl.showConfirmError.value && !confirmed;
+          const activeColor = Color(0xFF059669);
+          const errorColor = Color(0xFFDC2626);
           final borderCol = confirmed
-              ? activeBorder
-              : (isDark ? const Color(0xFF3A3D6E) : AppColors.borderLight);
+              ? activeColor
+              : hasError
+                  ? errorColor
+                  : (isDark ? const Color(0xFF3A3D6E) : AppColors.borderLight);
           final bgCol = confirmed
-              ? activeBorder.withValues(alpha: 0.07)
-              : (isDark ? const Color(0xFF1C1E3A) : Colors.white);
+              ? activeColor.withValues(alpha: 0.07)
+              : hasError
+                  ? errorColor.withValues(alpha: 0.05)
+                  : (isDark ? const Color(0xFF1C1E3A) : Colors.white);
 
-          return GestureDetector(
-            onTap: () => ctrl.groupConfirmed.value = !confirmed,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: bgCol,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: borderCol,
-                  width: confirmed ? 1.5 : 1,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  ctrl.groupConfirmed.value = !confirmed;
+                  if (!confirmed) ctrl.showConfirmError.value = false;
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: bgCol,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: borderCol,
+                      width: confirmed || hasError ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: confirmed ? activeColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: confirmed
+                                ? activeColor
+                                : hasError
+                                    ? errorColor
+                                    : (isDark
+                                          ? const Color(0xFF475569)
+                                          : const Color(0xFFCBD5E1)),
+                            width: 2,
+                          ),
+                        ),
+                        child: confirmed
+                            ? const Icon(
+                                Icons.check_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'I confirm both steps are done',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: confirmed
+                                    ? activeColor
+                                    : hasError
+                                        ? errorColor
+                                        : (isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A)),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '✓  I have joined the platform tester group\n'
+                              '✓  I have added the group email to my Play Console closed testing',
+                              style: TextStyle(
+                                fontSize: 12,
+                                height: 1.5,
+                                color: isDark
+                                    ? const Color(0xFF94A3B8)
+                                    : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: confirmed ? activeBorder : Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: confirmed
-                            ? activeBorder
-                            : (isDark
-                                  ? const Color(0xFF475569)
-                                  : const Color(0xFFCBD5E1)),
-                        width: 2,
+              if (hasError) ...[
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.error_outline_rounded,
+                        size: 13, color: errorColor),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Please confirm both steps before submitting',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: errorColor.withValues(alpha: 0.9),
                       ),
                     ),
-                    child: confirmed
-                        ? const Icon(
-                            Icons.check_rounded,
-                            color: Colors.white,
-                            size: 14,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'I confirm both steps are done',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: confirmed
-                                ? activeBorder
-                                : (isDark
-                                      ? Colors.white
-                                      : const Color(0xFF0F172A)),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '✓  I have joined the platform tester group\n'
-                          '✓  I have added the group email to my Play Console closed testing',
-                          style: TextStyle(
-                            fontSize: 12,
-                            height: 1.5,
-                            color: isDark
-                                ? const Color(0xFF94A3B8)
-                                : const Color(0xFF64748B),
-                          ),
-                        ),
-                        if (!confirmed) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            'Required before submitting your app',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: isDark
-                                  ? const Color(0xFF64748B)
-                                  : const Color(0xFF94A3B8),
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              ],
+            ],
           );
         }),
         const SizedBox(height: 24),
@@ -970,9 +990,16 @@ class _SetupStep extends StatelessWidget {
               TMTextField(
                 controller: ctrl.optInCtrl,
                 label: '',
-                hint: 'https://groups.google.com/g/your',
+                hint: 'https://groups.google.com/g/your-group',
                 prefixIcon: Icons.group_add_rounded,
                 keyboardType: TextInputType.url,
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return null;
+                  if (!v.trim().startsWith('https://groups.google.com/g/')) {
+                    return 'Must start with https://groups.google.com/g/';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
 

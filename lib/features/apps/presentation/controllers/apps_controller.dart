@@ -60,6 +60,9 @@ class AppsController extends GetxController {
   /// Must be confirmed on Step 3 before submitting.
   final groupConfirmed = false.obs;
 
+  /// Turns true when user taps submit without confirming — drives checkbox error state.
+  final showConfirmError = false.obs;
+
   /// Multi-select country codes. 'All' means no specific country filter.
   final selectedCountries = <String>['All'].obs;
 
@@ -532,8 +535,34 @@ class AppsController extends GetxController {
     }
   }
 
+  /// Permanently deletes an app and all associated data. Returns true on success.
+  Future<bool> deleteApp(AppListing app) async {
+    isLoading.value = true;
+    try {
+      await _repo.deleteApp(
+        appId: app.id,
+        ownerId: app.ownerId,
+        packageName: app.packageName,
+      );
+      myApps.removeWhere((a) => a.id == app.id);
+      _snack('App deleted successfully', success: true);
+      return true;
+    } catch (e) {
+      debugPrint('[AppsController] deleteApp error: $e');
+      _snack('Failed to delete app. Please try again.');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   /// Returns the posted app name on success, null on failure.
   Future<String?> submitApp() async {
+    if (!groupConfirmed.value) {
+      showConfirmError.value = true;
+      _snack('Please confirm both steps are done before submitting');
+      return null;
+    }
     if (!formKey.currentState!.validate()) return null;
 
     // ── Edit mode: update existing listing ──────────────────────────────────
@@ -656,6 +685,7 @@ class AppsController extends GetxController {
     deviceAppFound.value = null;
     packageAlreadyListed.value = false;
     groupConfirmed.value = false;
+    showConfirmError.value = false;
     currentStep.value = 0;
     editingAppId.value = null;
   }

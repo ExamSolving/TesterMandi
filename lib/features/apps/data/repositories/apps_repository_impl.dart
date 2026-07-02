@@ -1,12 +1,15 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/app_listing.dart';
 import '../../domain/repositories/apps_repository.dart';
 import '../models/app_listing_model.dart';
 
-
 class AppsRepositoryImpl implements AppsRepository {
-  AppsRepositoryImpl(this._db);
+  AppsRepositoryImpl(this._db, this._storage);
   final FirebaseFirestore _db;
+  final FirebaseStorage _storage;
 
   CollectionReference<Map<String, dynamic>> get _col =>
       _db.collection('apps');
@@ -106,5 +109,63 @@ class AppsRepositoryImpl implements AppsRepository {
       'data': {'type': 'new_app', 'appId': appId, 'appName': appName},
       'createdAt': Timestamp.now(),
     });
+  }
+
+  @override
+  Future<void> deleteApp({
+    required String appId,
+    required String ownerId,
+    required String packageName,
+  }) async {
+    // ── 1. Gather all related Firestore docs in parallel ─────────────────────
+    final results = await Future.wait([
+      _db.collection('swap_requests').where('fromAppId', isEqualTo: appId).get(),
+      _db.collection('swap_requests').where('toAppId', isEqualTo: appId).get(),
+      _db.collection('participations').where('appId', isEqualTo: appId).get(),
+      _db.collection('proofs').where('appId', isEqualTo: appId).get(),
+      _db.collection('notifications').where('data.appId', isEqualTo: appId).get(),
+      _db.collection('notification_requests').where('data.appId', isEqualTo: appId).get(),
+    ]);
+
+    final allDocs = results.expand((s) => s.docs).toList();
+
+    // ── 2. Delete Firebase Storage files ─────────────────────────────────────
+    await Future.wait([
+      _deleteStorageFolder('proofs/$appId'),
+      _deleteStorageFile('app_icons/$ownerId/$packageName.jpg'),
+    ]);
+
+    // ── 3. Batch-delete Firestore docs (max 499 per batch) ───────────────────
+    for (var i = 0; i < allDocs.length; i += 499) {
+      final chunk = allDocs.sublist(i, min(i + 499, allDocs.length));
+      final batch = _db.batch();
+      for (final doc in chunk) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    }
+
+    // ── 4. Delete the app document itself ─────────────────────────────────────
+    await _col.doc(appId).delete();
+  }
+
+  Future<void> _deleteStorageFolder(String path) async {
+    try {
+      final result = await _storage.ref(path).listAll();
+      await Future.wait([
+        ...result.items.map((r) => r.delete().catchError((_) {})),
+        ...result.prefixes.map((p) => _deleteStorageFolder(p.fullPath)),
+      ]);
+    } catch (e) {
+      debugPrint('[AppsRepo] Storage folder delete skipped ($path): $e');
+    }
+  }
+
+  Future<void> _deleteStorageFile(String path) async {
+    try {
+      await _storage.ref(path).delete();
+    } catch (e) {
+      debugPrint('[AppsRepo] Storage file delete skipped ($path): $e');
+    }
   }
 }
