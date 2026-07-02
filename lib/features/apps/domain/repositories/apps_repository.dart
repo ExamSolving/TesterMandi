@@ -10,6 +10,9 @@ abstract class AppsRepository {
   Stream<List<AppListing>> watchAllApps();
   Stream<List<AppListing>> watchUserApps(String userId);
 
+  Future<void> togglePauseListing(String appId, {required bool paused});
+  Future<void> updateApp(String appId, Map<String, dynamic> fields);
+
   Future<void> notifyNewAppListed({
     required String appId,
     required String appName,

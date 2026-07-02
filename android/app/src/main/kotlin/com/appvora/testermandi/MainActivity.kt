@@ -75,6 +75,20 @@ class MainActivity : FlutterActivity() {
                             result.success(mapOf("installed" to false, "name" to null, "iconBase64" to null))
                         }
                     }
+                    "launchApp" -> {
+                        val packageId = call.argument<String>("packageId")
+                        if (packageId.isNullOrBlank()) {
+                            result.error("INVALID_ARGS", "packageId is required", null)
+                            return@setMethodCallHandler
+                        }
+                        val launchIntent = packageManager.getLaunchIntentForPackage(packageId)
+                        if (launchIntent != null) {
+                            startActivity(launchIntent)
+                            result.success(true)
+                        } else {
+                            result.success(false)
+                        }
+                    }
                     else -> result.notImplemented()
                 }
             }

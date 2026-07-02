@@ -17,23 +17,84 @@ import 'app_posted_sheet.dart';
 // ── Country / Language data ───────────────────────────────────────────────────
 
 const _kCountries = [
-  'All', 'US', 'IN', 'GB', 'CA', 'AU', 'DE', 'FR', 'JP', 'BR',
-  'MX', 'KR', 'SG', 'AE', 'PK', 'NG', 'ZA', 'IT', 'ES', 'NL',
-  'SE', 'NO', 'DK', 'PL', 'AR', 'TR', 'ID', 'TH', 'PH', 'MY',
-  'SA', 'RU', 'PT', 'BE', 'NZ', 'FI', 'EG', 'VN', 'BD', 'CO',
+  'All',
+  'US',
+  'IN',
+  'GB',
+  'CA',
+  'AU',
+  'DE',
+  'FR',
+  'JP',
+  'BR',
+  'MX',
+  'KR',
+  'SG',
+  'AE',
+  'PK',
+  'NG',
+  'ZA',
+  'IT',
+  'ES',
+  'NL',
+  'SE',
+  'NO',
+  'DK',
+  'PL',
+  'AR',
+  'TR',
+  'ID',
+  'TH',
+  'PH',
+  'MY',
+  'SA',
+  'RU',
+  'PT',
+  'BE',
+  'NZ',
+  'FI',
+  'EG',
+  'VN',
+  'BD',
+  'CO',
 ];
 
 const _kLanguages = [
-  'English', 'Hindi', 'Spanish', 'French', 'German', 'Portuguese',
-  'Japanese', 'Korean', 'Arabic', 'Italian', 'Russian', 'Dutch',
-  'Turkish', 'Polish', 'Swedish', 'Chinese', 'Bengali', 'Urdu',
-  'Indonesian', 'Malay', 'Thai', 'Vietnamese', 'Filipino',
+  'English',
+  'Hindi',
+  'Spanish',
+  'French',
+  'German',
+  'Portuguese',
+  'Japanese',
+  'Korean',
+  'Arabic',
+  'Italian',
+  'Russian',
+  'Dutch',
+  'Turkish',
+  'Polish',
+  'Swedish',
+  'Chinese',
+  'Bengali',
+  'Urdu',
+  'Indonesian',
+  'Malay',
+  'Thai',
+  'Vietnamese',
+  'Filipino',
 ];
 
 const _kAndroidLevels = [
-  'Android 5.0 (API 21)', 'Android 6.0 (API 23)', 'Android 7.0 (API 24)',
-  'Android 8.0 (API 26)', 'Android 9.0 (API 28)', 'Android 10 (API 29)',
-  'Android 11 (API 30)', 'Android 12 (API 31)', 'Android 13 (API 33)',
+  'Android 5.0 (API 21)',
+  'Android 6.0 (API 23)',
+  'Android 7.0 (API 24)',
+  'Android 8.0 (API 26)',
+  'Android 9.0 (API 28)',
+  'Android 10 (API 29)',
+  'Android 11 (API 30)',
+  'Android 12 (API 31)',
+  'Android 13 (API 33)',
   'Android 14 (API 34)',
 ];
 
@@ -55,8 +116,10 @@ class _AddAppViewState extends State<AddAppView> {
   void initState() {
     super.initState();
     ctrl = Get.find<AppsController>();
-    // Always start clean — handles both fresh opens and back-navigation returns.
-    ctrl.resetAddAppForm();
+    // Only reset when opening for a new listing (not when pre-filled for editing).
+    if (ctrl.editingAppId.value == null) {
+      ctrl.resetAddAppForm();
+    }
   }
 
   @override
@@ -84,22 +147,32 @@ class _AddAppViewState extends State<AddAppView> {
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
-        title: Text(
-          TKeys.addAppTitle.tr,
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+        title: Obx(
+          () => Text(
+            ctrl.editingAppId.value != null
+                ? 'Edit App Details'
+                : TKeys.addAppTitle.tr,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: isDark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimaryLight,
+            ),
           ),
         ),
-        leading: Obx(() => ctrl.currentStep.value > 0
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded),
-                onPressed: ctrl.prevStep,
-              )
-            : IconButton(
-                icon: const Icon(Icons.close_rounded),
-                onPressed: Get.back,
-              )),
+        leading: Obx(
+          () => ctrl.currentStep.value > 0
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_rounded),
+                  onPressed: ctrl.prevStep,
+                )
+              : IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: ctrl.editingAppId.value != null
+                      ? ctrl.prevStep
+                      : Get.back,
+                ),
+        ),
         actions: [
           IconButton(
             tooltip: TKeys.testingGuideTitle.tr,
@@ -109,8 +182,11 @@ class _AddAppViewState extends State<AddAppView> {
                 color: AppColors.primary.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.info_outline_rounded,
-                  color: AppColors.primary, size: 18),
+              child: const Icon(
+                Icons.info_outline_rounded,
+                color: AppColors.primary,
+                size: 18,
+              ),
             ),
             onPressed: () => _showTestingGuide(context, isDark),
           ),
@@ -132,13 +208,16 @@ class _AddAppViewState extends State<AddAppView> {
                     children: [...previous, ?child],
                   ),
                   transitionBuilder: (child, anim) => SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.06, 0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: anim,
-                      curve: Curves.easeOutCubic,
-                    )),
+                    position:
+                        Tween<Offset>(
+                          begin: const Offset(0.06, 0),
+                          end: Offset.zero,
+                        ).animate(
+                          CurvedAnimation(
+                            parent: anim,
+                            curve: Curves.easeOutCubic,
+                          ),
+                        ),
                     child: FadeTransition(opacity: anim, child: child),
                   ),
                   child: KeyedSubtree(
@@ -148,8 +227,8 @@ class _AddAppViewState extends State<AddAppView> {
                       child: step == 0
                           ? _PackageStep(ctrl: ctrl, isDark: isDark)
                           : step == 1
-                              ? _DetailsStep(ctrl: ctrl, isDark: isDark)
-                              : _SetupStep(ctrl: ctrl, isDark: isDark),
+                          ? _DetailsStep(ctrl: ctrl, isDark: isDark)
+                          : _SetupStep(ctrl: ctrl, isDark: isDark),
                     ),
                   ),
                 );
@@ -169,6 +248,25 @@ class _StepProgressBar extends StatelessWidget {
   const _StepProgressBar({required this.ctrl, required this.isDark});
   final AppsController ctrl;
   final bool isDark;
+
+  Widget _connector(bool done, bool isDark) => Expanded(
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      height: 2,
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+        gradient: done
+            ? const LinearGradient(
+                colors: [Color(0xFF059669), Color(0xFF10B981)],
+              )
+            : null,
+        color: done
+            ? null
+            : (isDark ? const Color(0xFF2D3748) : const Color(0xFFE2E8F0)),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -190,22 +288,7 @@ class _StepProgressBar extends StatelessWidget {
           children: [
             for (int i = 0; i < 3; i++) ...[
               _StepCircle(index: i, currentStep: step, isDark: isDark),
-              if (i < 2)
-                Expanded(
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 350),
-                    height: 2,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(1),
-                      gradient: step > i
-                          ? const LinearGradient(
-                              colors: [Color(0xFF059669), Color(0xFF10B981)])
-                          : null,
-                      color: step > i ? null : (isDark ? const Color(0xFF2D3748) : const Color(0xFFE2E8F0)),
-                    ),
-                  ),
-                ),
+              if (i < 2) _connector(step > i, isDark),
             ],
           ],
         );
@@ -231,13 +314,13 @@ class _StepCircle extends StatelessWidget {
     final color = done
         ? const Color(0xFF059669)
         : current
-            ? AppColors.primary
-            : (isDark ? const Color(0xFF2D3748) : const Color(0xFFCBD5E1));
+        ? AppColors.primary
+        : (isDark ? const Color(0xFF2D3748) : const Color(0xFFCBD5E1));
     final labelColor = done
         ? const Color(0xFF059669)
         : current
-            ? AppColors.primary
-            : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8));
+        ? AppColors.primary
+        : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8));
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -250,7 +333,13 @@ class _StepCircle extends StatelessWidget {
             shape: BoxShape.circle,
             color: color,
             boxShadow: current
-                ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.35), blurRadius: 10, spreadRadius: 1)]
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                    ),
+                  ]
                 : null,
           ),
           child: Center(
@@ -259,7 +348,11 @@ class _StepCircle extends StatelessWidget {
                 : Text(
                     '${index + 1}',
                     style: TextStyle(
-                      color: (current || done) ? Colors.white : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+                      color: (current || done)
+                          ? Colors.white
+                          : (isDark
+                                ? const Color(0xFF64748B)
+                                : const Color(0xFF94A3B8)),
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),
@@ -291,7 +384,12 @@ class _BottomNavRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).padding.bottom + 12),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        12,
+        20,
+        MediaQuery.of(context).padding.bottom + 12,
+      ),
       decoration: BoxDecoration(
         color: isDark ? AppColors.cardDark : Colors.white,
         boxShadow: [
@@ -304,8 +402,17 @@ class _BottomNavRow extends StatelessWidget {
       ),
       child: Obx(() {
         final step = ctrl.currentStep.value;
+        final isEditing = ctrl.editingAppId.value != null;
         final isLast = step == 2;
-        final nextBlocked = step == 0 && ctrl.packageAlreadyListed.value;
+        final nextBlocked =
+            !isEditing && step == 0 && ctrl.packageAlreadyListed.value;
+
+        // In edit mode, next step label maps differently (skip step 0)
+        String nextLabel() {
+          if (isEditing) return 'Next: Submit';
+          return 'Next: ${_kStepLabels[step + 1]}';
+        }
+
         return Row(
           children: [
             if (step > 0)
@@ -314,46 +421,69 @@ class _BottomNavRow extends StatelessWidget {
                   onPressed: ctrl.prevStep,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    side: BorderSide(color: isDark ? AppColors.borderDark : AppColors.borderLight),
-                    foregroundColor: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    side: BorderSide(
+                      color: isDark
+                          ? AppColors.borderDark
+                          : AppColors.borderLight,
+                    ),
+                    foregroundColor: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
                   ),
-                  child: const Text('Back', style: TextStyle(fontWeight: FontWeight.w600)),
+                  child: Text(
+                    isEditing && step <= 1 ? 'Cancel' : 'Back',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
             if (step > 0) const SizedBox(width: 12),
             Expanded(
               flex: 2,
               child: isLast
-                  ? Obx(() => TMButton(
-                        label: TKeys.addAppSubmit.tr,
+                  ? Obx(
+                      () => TMButton(
+                        label: isEditing
+                            ? 'Save Changes'
+                            : TKeys.addAppSubmit.tr,
                         isLoading: ctrl.isLoading.value,
                         onPressed: ctrl.groupConfirmed.value
                             ? () async {
                                 final name = await ctrl.submitApp();
                                 if (name != null) {
                                   Get.back();
-                                  // ignore: use_build_context_synchronously
-                                  final ctx = Get.overlayContext;
-                                  if (ctx != null) {
-                                    await showModalBottomSheet(
-                                      context: ctx,
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                      builder: (_) =>
-                                          AppPostedSheet(appName: name),
-                                    );
+                                  if (!isEditing) {
+                                    // ignore: use_build_context_synchronously
+                                    final ctx = Get.overlayContext;
+                                    if (ctx != null) {
+                                      await showModalBottomSheet(
+                                        context: ctx,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (_) =>
+                                            AppPostedSheet(appName: name),
+                                      );
+                                    }
                                   }
                                 }
                               }
                             : null,
-                        icon: Icons.rocket_launch_rounded,
-                      ))
+                        icon: isEditing
+                            ? Icons.check_circle_rounded
+                            : Icons.rocket_launch_rounded,
+                      ),
+                    )
                   : ElevatedButton(
-                      onPressed: nextBlocked ? null : () => ctrl.nextStep(context),
+                      onPressed: nextBlocked
+                          ? null
+                          : () => ctrl.nextStep(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: nextBlocked
-                            ? (isDark ? const Color(0xFF1E2030) : const Color(0xFFE2E8F0))
+                            ? (isDark
+                                  ? const Color(0xFF1E2030)
+                                  : const Color(0xFFE2E8F0))
                             : AppColors.primary,
                         disabledBackgroundColor: isDark
                             ? const Color(0xFF1E2030)
@@ -363,15 +493,20 @@ class _BottomNavRow extends StatelessWidget {
                             ? const Color(0xFF475569)
                             : const Color(0xFF94A3B8),
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                         elevation: 0,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Next: ${_kStepLabels[step + 1]}',
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                            nextLabel(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
                           ),
                           const SizedBox(width: 6),
                           const Icon(Icons.arrow_forward_rounded, size: 18),
@@ -397,81 +532,164 @@ class _PackageStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = ctrl.editingAppId.value != null;
+    final borderColor = isDark
+        ? const Color(0xFF3A3D6E)
+        : AppColors.borderLight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
         _SectionLabel('Package ID', required: true, isDark: isDark),
         const SizedBox(height: 8),
-        _PackageSearchRow(ctrl: ctrl, isDark: isDark),
-        const SizedBox(height: 12),
-        _LookupResultBanner(ctrl: ctrl),
-        const SizedBox(height: 16),
 
-        // Icon section — hidden when this package ID is already listed
-        Obx(() => ctrl.packageAlreadyListed.value
-            ? const SizedBox.shrink()
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SectionLabel('App Icon', isDark: isDark),
-                  const SizedBox(height: 8),
-                  _IconPreview(ctrl: ctrl, isDark: isDark),
-                  const SizedBox(height: 20),
-                ],
-              )),
-
-        _SectionLabel('App Name', required: true, isDark: isDark),
-        const SizedBox(height: 8),
-        Obx(() => TMTextField(
-              controller: ctrl.nameCtrl,
-              label: '',
-              hint: 'e.g. My Awesome App',
-              prefixIcon: Icons.android_rounded,
-              enabled: !ctrl.packageAlreadyListed.value,
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? TKeys.validationRequired.tr : null,
-            )),
-        const SizedBox(height: 20),
-
-        _SectionLabel('Short Description', isDark: isDark, badge: 'Optional'),
-        const SizedBox(height: 8),
-        Obx(() => TMTextField(
-              controller: ctrl.descCtrl,
-              label: '',
-              hint: 'Briefly describe what your app does and what testers should focus on…',
-              maxLines: 4,
-              enabled: !ctrl.packageAlreadyListed.value,
-            )),
-        const SizedBox(height: 8),
-        Obx(() {
-          final failed = ctrl.lookupResult.value == false;
-          final deviceFound = ctrl.deviceAppFound.value == true;
-          // Don't show "fill manually" hint when it failed due to duplicate
-          if (ctrl.packageAlreadyListed.value) return const SizedBox.shrink();
-          if (!failed || deviceFound) return const SizedBox.shrink();
-          return Container(
-            margin: const EdgeInsets.only(top: 4),
-            padding: const EdgeInsets.all(12),
+        if (isEditing) ...[
+          // ── Locked package ID display ──────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFFF59E0B).withValues(alpha: 0.07),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.3)),
+              color: isDark ? const Color(0xFF1A1A2E) : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: borderColor),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.edit_note_rounded, color: Color(0xFFF59E0B), size: 18),
-                SizedBox(width: 10),
+                Icon(
+                  Icons.lock_rounded,
+                  size: 16,
+                  color: isDark
+                      ? AppColors.textHintDark
+                      : AppColors.textHintLight,
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'App not found online or on device — please fill the name and description manually above.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF92400E), height: 1.4),
+                    ctrl.packageCtrl.text,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF2D3748)
+                        : const Color(0xFFE2E8F0),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'Cannot change',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? AppColors.textHintDark
+                          : AppColors.textHintLight,
+                    ),
                   ),
                 ),
               ],
             ),
-          );
-        }),
+          ),
+        ] else ...[
+          // ── Normal search row + lookup banner ──────────────────────
+          _PackageSearchRow(ctrl: ctrl, isDark: isDark),
+          const SizedBox(height: 12),
+          _LookupResultBanner(ctrl: ctrl),
+        ],
+
+        const SizedBox(height: 16),
+
+        // Icon section — hidden in edit mode and when already listed
+        if (!isEditing)
+          Obx(
+            () => ctrl.packageAlreadyListed.value
+                ? const SizedBox.shrink()
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SectionLabel('App Icon', isDark: isDark),
+                      const SizedBox(height: 8),
+                      _IconPreview(ctrl: ctrl, isDark: isDark),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+          ),
+
+        _SectionLabel('App Name', required: true, isDark: isDark),
+        const SizedBox(height: 8),
+        TMTextField(
+          controller: ctrl.nameCtrl,
+          label: '',
+          hint: 'e.g. My Awesome App',
+          prefixIcon: Icons.android_rounded,
+          enabled: isEditing || !ctrl.packageAlreadyListed.value,
+          validator: (v) => v == null || v.trim().isEmpty
+              ? TKeys.validationRequired.tr
+              : null,
+        ),
+
+        const SizedBox(height: 20),
+
+        _SectionLabel('Short Description', isDark: isDark, badge: 'Optional'),
+        const SizedBox(height: 8),
+        TMTextField(
+          controller: ctrl.descCtrl,
+          label: '',
+          hint:
+              'Briefly describe what your app does and what testers should focus on…',
+          maxLines: 4,
+          enabled: isEditing || !ctrl.packageAlreadyListed.value,
+        ),
+
+        if (!isEditing) ...[
+          const SizedBox(height: 8),
+          Obx(() {
+            final failed = ctrl.lookupResult.value == false;
+            final deviceFound = ctrl.deviceAppFound.value == true;
+            if (ctrl.packageAlreadyListed.value) return const SizedBox.shrink();
+            if (!failed || deviceFound) return const SizedBox.shrink();
+            return Container(
+              margin: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B).withValues(alpha: 0.07),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+                ),
+              ),
+              child: const Row(
+                children: [
+                  Icon(
+                    Icons.edit_note_rounded,
+                    color: Color(0xFFF59E0B),
+                    size: 18,
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'App not found online or on device — please fill the name and description manually above.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF92400E),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
       ],
     );
   }
@@ -503,11 +721,13 @@ class _DetailsStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Obx(() => _CategoryChips(
-              selected: ctrl.selectedAppCategory.value,
-              onSelect: (c) => ctrl.selectedAppCategory.value = c,
-              isDark: isDark,
-            )),
+        Obx(
+          () => _CategoryChips(
+            selected: ctrl.selectedAppCategory.value,
+            onSelect: (c) => ctrl.selectedAppCategory.value = c,
+            isDark: isDark,
+          ),
+        ),
         const SizedBox(height: 24),
 
         _SectionLabel('Target Countries', isDark: isDark, badge: 'Optional'),
@@ -521,13 +741,15 @@ class _DetailsStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Obx(() => _HorizontalChips(
-              items: _kCountries,
-              selected: ctrl.selectedCountries.toSet(),
-              onTap: ctrl.toggleCountry,
-              isDark: isDark,
-              primaryColor: AppColors.primary,
-            )),
+        Obx(
+          () => _HorizontalChips(
+            items: _kCountries,
+            selected: ctrl.selectedCountries.toSet(),
+            onTap: ctrl.toggleCountry,
+            isDark: isDark,
+            primaryColor: AppColors.primary,
+          ),
+        ),
         const SizedBox(height: 24),
 
         _SectionLabel('App Language', isDark: isDark, badge: 'Optional'),
@@ -541,13 +763,15 @@ class _DetailsStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Obx(() => _HorizontalChips(
-              items: _kLanguages,
-              selected: ctrl.selectedLanguages.toSet(),
-              onTap: ctrl.toggleLanguage,
-              isDark: isDark,
-              primaryColor: const Color(0xFF8B5CF6),
-            )),
+        Obx(
+          () => _HorizontalChips(
+            items: _kLanguages,
+            selected: ctrl.selectedLanguages.toSet(),
+            onTap: ctrl.toggleLanguage,
+            isDark: isDark,
+            primaryColor: const Color(0xFF8B5CF6),
+          ),
+        ),
       ],
     );
   }
@@ -565,7 +789,9 @@ class _SetupStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardColor = isDark ? const Color(0xFF232345) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF3A3D6E) : AppColors.borderLight;
+    final borderColor = isDark
+        ? const Color(0xFF3A3D6E)
+        : AppColors.borderLight;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -593,7 +819,10 @@ class _SetupStep extends StatelessWidget {
               decoration: BoxDecoration(
                 color: bgCol,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderCol, width: confirmed ? 1.5 : 1),
+                border: Border.all(
+                  color: borderCol,
+                  width: confirmed ? 1.5 : 1,
+                ),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -608,12 +837,18 @@ class _SetupStep extends StatelessWidget {
                       border: Border.all(
                         color: confirmed
                             ? activeBorder
-                            : (isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
+                            : (isDark
+                                  ? const Color(0xFF475569)
+                                  : const Color(0xFFCBD5E1)),
                         width: 2,
                       ),
                     ),
                     child: confirmed
-                        ? const Icon(Icons.check_rounded, color: Colors.white, size: 14)
+                        ? const Icon(
+                            Icons.check_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          )
                         : null,
                   ),
                   const SizedBox(width: 12),
@@ -628,7 +863,9 @@ class _SetupStep extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             color: confirmed
                                 ? activeBorder
-                                : (isDark ? Colors.white : const Color(0xFF0F172A)),
+                                : (isDark
+                                      ? Colors.white
+                                      : const Color(0xFF0F172A)),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -672,7 +909,11 @@ class _SetupStep extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SectionLabel('Latest Version', isDark: isDark, badge: 'Optional'),
+              _SectionLabel(
+                'Latest Version',
+                isDark: isDark,
+                badge: 'Optional',
+              ),
               const SizedBox(height: 8),
               TMTextField(
                 controller: ctrl.latestVersionCtrl,
@@ -682,18 +923,24 @@ class _SetupStep extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              _SectionLabel('Minimum Android Level', isDark: isDark, badge: 'Optional'),
+              _SectionLabel(
+                'Minimum Android Level',
+                isDark: isDark,
+                badge: 'Optional',
+              ),
               const SizedBox(height: 8),
-              Obx(() => _DropdownField(
-                    value: ctrl.selectedMinAndroid.value,
-                    items: _kAndroidLevels,
-                    hint: 'Select minimum Android version',
-                    icon: Icons.android_rounded,
-                    isDark: isDark,
-                    cardColor: cardColor,
-                    borderColor: borderColor,
-                    onChanged: (v) => ctrl.selectedMinAndroid.value = v,
-                  )),
+              Obx(
+                () => _DropdownField(
+                  value: ctrl.selectedMinAndroid.value,
+                  items: _kAndroidLevels,
+                  hint: 'Select minimum Android version',
+                  icon: Icons.android_rounded,
+                  isDark: isDark,
+                  cardColor: cardColor,
+                  borderColor: borderColor,
+                  onChanged: (v) => ctrl.selectedMinAndroid.value = v,
+                ),
+              ),
             ],
           ),
         ),
@@ -704,13 +951,19 @@ class _SetupStep extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SectionLabel('Tester Group Link', isDark: isDark, badge: 'Optional'),
+              _SectionLabel(
+                'Tester Group Link',
+                isDark: isDark,
+                badge: 'Optional',
+              ),
               const SizedBox(height: 4),
               Text(
                 'Your Play Store opt-in link for closed testing.',
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                  color: isDark
+                      ? AppColors.textHintDark
+                      : AppColors.textHintLight,
                 ),
               ),
               const SizedBox(height: 8),
@@ -723,20 +976,27 @@ class _SetupStep extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              _SectionLabel('Testing Instructions', isDark: isDark, badge: 'Optional'),
+              _SectionLabel(
+                'Testing Instructions',
+                isDark: isDark,
+                badge: 'Optional',
+              ),
               const SizedBox(height: 4),
               Text(
                 'Tell testers what to focus on, known issues, or how to report bugs.',
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                  color: isDark
+                      ? AppColors.textHintDark
+                      : AppColors.textHintLight,
                 ),
               ),
               const SizedBox(height: 8),
               TMTextField(
                 controller: ctrl.testingInstructionsCtrl,
                 label: '',
-                hint: 'e.g. Test the login flow and report any crashes on the home screen…',
+                hint:
+                    'e.g. Test the login flow and report any crashes on the home screen…',
                 maxLines: 4,
               ),
             ],
@@ -751,11 +1011,13 @@ class _SetupStep extends StatelessWidget {
             children: [
               _SectionLabel('Testers Needed', required: true, isDark: isDark),
               const SizedBox(height: 8),
-              Obx(() => _TestersSlider(
-                    value: ctrl.testersNeeded.value,
-                    onChange: (v) => ctrl.testersNeeded.value = v,
-                    isDark: isDark,
-                  )),
+              Obx(
+                () => _TestersSlider(
+                  value: ctrl.testersNeeded.value,
+                  onChange: (v) => ctrl.testersNeeded.value = v,
+                  isDark: isDark,
+                ),
+              ),
             ],
           ),
         ),
@@ -789,14 +1051,20 @@ class _SectionLabel extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight,
             letterSpacing: 0.2,
           ),
         ),
         if (required)
           const Text(
             ' *',
-            style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.w700, fontSize: 14),
+            style: TextStyle(
+              color: Color(0xFFEF4444),
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
           ),
         if (badge != null) ...[
           const SizedBox(width: 6),
@@ -808,7 +1076,11 @@ class _SectionLabel extends StatelessWidget {
             ),
             child: Text(
               badge!,
-              style: const TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontSize: 10,
+                color: Color(0xFF64748B),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -830,10 +1102,17 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1E3A) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? const Color(0xFF3A3D6E) : AppColors.borderLight),
+        border: Border.all(
+          color: isDark ? const Color(0xFF3A3D6E) : AppColors.borderLight,
+        ),
         boxShadow: isDark
             ? null
-            : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)],
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                ),
+              ],
       ),
       child: child,
     );
@@ -875,7 +1154,9 @@ class _HorizontalChips extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? primaryColor
-                    : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+                    : (isDark
+                          ? const Color(0xFF1E293B)
+                          : const Color(0xFFF1F5F9)),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
@@ -890,7 +1171,9 @@ class _HorizontalChips extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected
                       ? Colors.white
-                      : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                      : (isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight),
                 ),
               ),
             ),
@@ -925,7 +1208,9 @@ class _DropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimaryLight;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       decoration: BoxDecoration(
@@ -937,12 +1222,23 @@ class _DropdownField extends StatelessWidget {
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          hint: Text(hint, style: TextStyle(fontSize: 13, color: isDark ? AppColors.textHintDark : AppColors.textHintLight)),
+          hint: Text(
+            hint,
+            style: TextStyle(
+              fontSize: 13,
+              color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+            ),
+          ),
           icon: Icon(Icons.keyboard_arrow_down_rounded, color: textColor),
           dropdownColor: cardColor,
           style: TextStyle(fontSize: 14, color: textColor),
           items: items
-              .map((l) => DropdownMenuItem(value: l, child: Text(l, style: TextStyle(color: textColor))))
+              .map(
+                (l) => DropdownMenuItem(
+                  value: l,
+                  child: Text(l, style: TextStyle(color: textColor)),
+                ),
+              )
               .toList(),
           onChanged: onChanged,
         ),
@@ -987,8 +1283,12 @@ class _PackageSearchRowState extends State<_PackageSearchRow> {
     final ctrl = widget.ctrl;
     final isDark = widget.isDark;
     final cardColor = isDark ? const Color(0xFF232345) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF3A3D6E) : AppColors.borderLight;
-    final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final borderColor = isDark
+        ? const Color(0xFF3A3D6E)
+        : AppColors.borderLight;
+    final textColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimaryLight;
     final hintColor = isDark ? AppColors.textHintDark : AppColors.textHintLight;
 
     return Row(
@@ -1001,22 +1301,48 @@ class _PackageSearchRowState extends State<_PackageSearchRow> {
             style: TextStyle(color: textColor, fontSize: 14),
             onFieldSubmitted: (_) => ctrl.lookupAppDetails(),
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return TKeys.validationRequired.tr;
+              if (v == null || v.trim().isEmpty)
+                return TKeys.validationRequired.tr;
               if (!v.contains('.')) return TKeys.validationUrlInvalid.tr;
               return null;
             },
             decoration: InputDecoration(
               hintText: 'e.g. com.example.myapp',
               hintStyle: TextStyle(color: hintColor, fontSize: 13),
-              prefixIcon: Icon(Icons.code_rounded, color: AppColors.primary, size: 20),
+              prefixIcon: Icon(
+                Icons.code_rounded,
+                color: AppColors.primary,
+                size: 20,
+              ),
               filled: true,
               fillColor: cardColor,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: borderColor)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: borderColor)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: AppColors.primary, width: 1.5)),
-              errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFDC2626))),
-              focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(color: borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: Color(0xFFDC2626)),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(
+                  color: Color(0xFFDC2626),
+                  width: 1.5,
+                ),
+              ),
             ),
           ),
         ),
@@ -1030,21 +1356,33 @@ class _PackageSearchRowState extends State<_PackageSearchRow> {
               backgroundColor: AppColors.primary,
               disabledBackgroundColor: const Color(0xFF334155),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 14),
             ),
             child: _loading
                 ? const SizedBox(
-                    width: 18, height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.search_rounded, size: 18),
                       SizedBox(width: 5),
-                      Text('Search', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                      Text(
+                        'Search',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ],
                   ),
           ),
@@ -1085,9 +1423,19 @@ class _LookupResultBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: TextStyle(color: textColor, fontSize: 11, height: 1.4)),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: textColor, fontSize: 11, height: 1.4),
+                ),
               ],
             ),
           ),
@@ -1109,12 +1457,18 @@ class _LookupResultBanner extends StatelessWidget {
           decoration: BoxDecoration(
             color: const Color(0xFFDC2626).withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFDC2626).withValues(alpha: 0.4)),
+            border: Border.all(
+              color: const Color(0xFFDC2626).withValues(alpha: 0.4),
+            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.error_rounded, color: Color(0xFFDC2626), size: 20),
+              const Icon(
+                Icons.error_rounded,
+                color: Color(0xFFDC2626),
+                size: 20,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -1184,7 +1538,8 @@ class _LookupResultBanner extends StatelessWidget {
           textColor: const Color(0xFF047857),
           icon: Icons.check_circle_rounded,
           title: 'App details fetched from Play Store ✓',
-          subtitle: 'Name, description${hasIcon ? ", and icon" : ""} filled in — review and edit if needed.',
+          subtitle:
+              'Name, description${hasIcon ? ", and icon" : ""} filled in — review and edit if needed.',
         );
       }
 
@@ -1195,7 +1550,8 @@ class _LookupResultBanner extends StatelessWidget {
           textColor: const Color(0xFF0369A1),
           icon: Icons.phone_android_rounded,
           title: 'App found on your device ✓',
-          subtitle: 'Name filled from installed app. Icon and description not available — please enter them manually.',
+          subtitle:
+              'Name filled from installed app. Icon and description not available — please enter them manually.',
         );
       }
 
@@ -1207,7 +1563,8 @@ class _LookupResultBanner extends StatelessWidget {
           textColor: const Color(0xFF0369A1),
           icon: Icons.science_outlined,
           title: 'Closed testing app found ✓',
-          subtitle: 'Name${hasIcon ? " and icon" : ""} fetched — please enter a description manually.',
+          subtitle:
+              'Name${hasIcon ? " and icon" : ""} fetched — please enter a description manually.',
         );
       }
 
@@ -1217,12 +1574,18 @@ class _LookupResultBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.3)),
+          border: Border.all(
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.3),
+          ),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.info_outline_rounded, color: Color(0xFFF59E0B), size: 18),
+            const Icon(
+              Icons.info_outline_rounded,
+              color: Color(0xFFF59E0B),
+              size: 18,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -1230,17 +1593,32 @@ class _LookupResultBanner extends StatelessWidget {
                 children: [
                   const Text(
                     'App not found',
-                    style: TextStyle(color: Color(0xFFB45309), fontSize: 13, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: Color(0xFFB45309),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   const Text(
                     'Not found on Play Store or this device. Fill in the details manually below.',
-                    style: TextStyle(color: Color(0xFF92400E), fontSize: 11, height: 1.4),
+                    style: TextStyle(
+                      color: Color(0xFF92400E),
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: ctrl.lookupAppDetails,
-                    child: const Text('Try again', style: TextStyle(color: Color(0xFFF59E0B), fontSize: 12, fontWeight: FontWeight.w700)),
+                    child: const Text(
+                      'Try again',
+                      style: TextStyle(
+                        color: Color(0xFFF59E0B),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -1278,8 +1656,12 @@ class _DashedBorderPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(strokeWidth / 2, strokeWidth / 2,
-          size.width - strokeWidth, size.height - strokeWidth),
+      Rect.fromLTWH(
+        strokeWidth / 2,
+        strokeWidth / 2,
+        size.width - strokeWidth,
+        size.height - strokeWidth,
+      ),
       Radius.circular(radius),
     );
     final source = Path()..addRRect(rrect);
@@ -1292,7 +1674,10 @@ class _DashedBorderPainter extends CustomPainter {
         final len = draw ? _dash : _gap;
         if (draw) {
           dest.addPath(
-            metric.extractPath(distance, (distance + len).clamp(0, metric.length)),
+            metric.extractPath(
+              distance,
+              (distance + len).clamp(0, metric.length),
+            ),
             Offset.zero,
           );
         }
@@ -1327,30 +1712,30 @@ class _IconPreview extends StatelessWidget {
   }
 
   Widget _netImageThumb(String url) => ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: CachedNetworkImage(
-          imageUrl: url,
-          width: 64,
-          height: 64,
-          fit: BoxFit.cover,
-          placeholder: (_, _) => _thumb(),
-          errorWidget: (_, _, _) => _thumb(),
-        ),
-      );
+    borderRadius: BorderRadius.circular(14),
+    child: CachedNetworkImage(
+      imageUrl: url,
+      width: 64,
+      height: 64,
+      fit: BoxFit.cover,
+      placeholder: (_, _) => _thumb(),
+      errorWidget: (_, _, _) => _thumb(),
+    ),
+  );
 
   Widget _thumb() => Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.6)],
-          ),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: const Icon(Icons.android_rounded, color: Colors.white, size: 30),
-      );
+    width: 64,
+    height: 64,
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.6)],
+      ),
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: const Icon(Icons.android_rounded, color: Colors.white, size: 30),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -1369,12 +1754,18 @@ class _IconPreview extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.primary)),
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: AppColors.primary,
+                ),
+              ),
               SizedBox(width: 10),
-              Text('Fetching icon…',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8))),
+              Text(
+                'Fetching icon…',
+                style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+              ),
             ],
           ),
         );
@@ -1385,8 +1776,12 @@ class _IconPreview extends StatelessWidget {
         return _ResolvedIconRow(
           image: ClipRRect(
             borderRadius: BorderRadius.circular(14),
-            child: Image.file(File(pickedFile.path),
-                width: 64, height: 64, fit: BoxFit.cover),
+            child: Image.file(
+              File(pickedFile.path),
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+            ),
           ),
           label: 'Icon uploaded from gallery ✓',
           source: 'Gallery · tap to change',
@@ -1419,12 +1814,18 @@ class _IconPreview extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                  color: isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFF1F5F9),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.lock_outline_rounded,
-                    size: 22,
-                    color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
+                child: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 22,
+                  color: isDark
+                      ? const Color(0xFF475569)
+                      : const Color(0xFFCBD5E1),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -1432,7 +1833,9 @@ class _IconPreview extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1),
+                  color: isDark
+                      ? const Color(0xFF475569)
+                      : const Color(0xFFCBD5E1),
                 ),
               ),
               const SizedBox(height: 2),
@@ -1440,7 +1843,9 @@ class _IconPreview extends StatelessWidget {
                 'Icon options unlock after search',
                 style: TextStyle(
                   fontSize: 11,
-                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  color: isDark
+                      ? const Color(0xFF334155)
+                      : const Color(0xFFE2E8F0),
                 ),
               ),
             ],
@@ -1500,10 +1905,16 @@ class _ActiveUploadZone extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardColor = isDark ? const Color(0xFF232345) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF3A3D6E) : AppColors.borderLight;
+    final borderColor = isDark
+        ? const Color(0xFF3A3D6E)
+        : AppColors.borderLight;
     final hintColor = isDark ? AppColors.textHintDark : AppColors.textHintLight;
-    final textColor = isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final dividerColor = isDark ? const Color(0xFF2D2F52) : const Color(0xFFE2E8F0);
+    final textColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimaryLight;
+    final dividerColor = isDark
+        ? const Color(0xFF2D2F52)
+        : const Color(0xFFE2E8F0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1521,7 +1932,9 @@ class _ActiveUploadZone extends StatelessWidget {
               width: double.infinity,
               height: 120,
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: isDark ? 0.05 : 0.03),
+                color: AppColors.primary.withValues(
+                  alpha: isDark ? 0.05 : 0.03,
+                ),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -1533,8 +1946,11 @@ class _ActiveUploadZone extends StatelessWidget {
                       color: AppColors.primary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.cloud_upload_rounded,
-                        color: AppColors.primary, size: 26),
+                    child: const Icon(
+                      Icons.cloud_upload_rounded,
+                      color: AppColors.primary,
+                      size: 26,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -1550,7 +1966,9 @@ class _ActiveUploadZone extends StatelessWidget {
                     'JPG or PNG  ·  Max 512 × 512',
                     style: TextStyle(
                       fontSize: 11,
-                      color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                      color: isDark
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF94A3B8),
                     ),
                   ),
                 ],
@@ -1571,7 +1989,9 @@ class _ActiveUploadZone extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8),
+                  color: isDark
+                      ? const Color(0xFF475569)
+                      : const Color(0xFF94A3B8),
                   letterSpacing: 1.2,
                 ),
               ),
@@ -1598,19 +2018,29 @@ class _ActiveUploadZone extends StatelessWidget {
           decoration: InputDecoration(
             hintText: 'Enter icon URL  (https://…)',
             hintStyle: TextStyle(color: hintColor, fontSize: 12),
-            prefixIcon: const Icon(Icons.link_rounded, color: Color(0xFF64748B), size: 18),
+            prefixIcon: const Icon(
+              Icons.link_rounded,
+              color: Color(0xFF64748B),
+              size: 18,
+            ),
             filled: true,
             fillColor: cardColor,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 13,
+            ),
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: borderColor)),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: borderColor),
+            ),
             enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: borderColor)),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: borderColor),
+            ),
             focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.primary, width: 1.5)),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+            ),
           ),
         ),
       ],
@@ -1647,31 +2077,42 @@ class _ResolvedIconRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: const TextStyle(
-                      color: Color(0xFF059669),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13)),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFF059669),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
               const SizedBox(height: 2),
               Row(
                 children: [
-                  const Icon(Icons.check_circle_rounded,
-                      size: 12, color: Color(0xFF059669)),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    size: 12,
+                    color: Color(0xFF059669),
+                  ),
                   const SizedBox(width: 4),
-                  Text(source,
-                      style: TextStyle(
-                          fontSize: 11,
-                          color: isDark
-                              ? AppColors.textHintDark
-                              : AppColors.textHintLight)),
+                  Text(
+                    source,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark
+                          ? AppColors.textHintDark
+                          : AppColors.textHintLight,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 6),
               GestureDetector(
                 onTap: onClear,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEF4444).withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(6),
@@ -1679,9 +2120,10 @@ class _ResolvedIconRow extends StatelessWidget {
                   child: const Text(
                     'Remove',
                     style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFFEF4444),
-                        fontWeight: FontWeight.w600),
+                      fontSize: 11,
+                      color: Color(0xFFEF4444),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -1698,7 +2140,11 @@ class _ResolvedIconRow extends StatelessWidget {
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _CategoryChips extends StatelessWidget {
-  const _CategoryChips({required this.selected, required this.onSelect, required this.isDark});
+  const _CategoryChips({
+    required this.selected,
+    required this.onSelect,
+    required this.isDark,
+  });
   final AppCategory? selected;
   final void Function(AppCategory) onSelect;
   final bool isDark;
@@ -1724,7 +2170,9 @@ class _CategoryChips extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? _accent
-                    : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+                    : (isDark
+                          ? const Color(0xFF1E293B)
+                          : const Color(0xFFF1F5F9)),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
@@ -1739,7 +2187,9 @@ class _CategoryChips extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected
                       ? Colors.white
-                      : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight),
+                      : (isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight),
                 ),
               ),
             ),
@@ -1755,7 +2205,11 @@ class _CategoryChips extends StatelessWidget {
 // ══════════════════════════════════════════════════════════════════════════════
 
 class _TestersSlider extends StatelessWidget {
-  const _TestersSlider({required this.value, required this.onChange, required this.isDark});
+  const _TestersSlider({
+    required this.value,
+    required this.onChange,
+    required this.isDark,
+  });
   final int value;
   final void Function(int) onChange;
   final bool isDark;
@@ -1779,7 +2233,9 @@ class _TestersSlider extends StatelessWidget {
               'Max 100',
               style: TextStyle(
                 fontSize: 12,
-                color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                color: isDark
+                    ? AppColors.textHintDark
+                    : AppColors.textHintLight,
               ),
             ),
           ],
@@ -1790,7 +2246,9 @@ class _TestersSlider extends StatelessWidget {
           max: 100,
           divisions: 99,
           activeColor: AppColors.primary,
-          inactiveColor: isDark ? const Color(0xFF2D3748) : const Color(0xFFE2E8F0),
+          inactiveColor: isDark
+              ? const Color(0xFF2D3748)
+              : const Color(0xFFE2E8F0),
           onChanged: (v) => onChange(v.round()),
         ),
       ],
@@ -1809,7 +2267,9 @@ class _SetupInstructionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardColor = isDark ? const Color(0xFF1C1E3A) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF3A3D6E) : AppColors.borderLight;
+    final borderColor = isDark
+        ? const Color(0xFF3A3D6E)
+        : AppColors.borderLight;
 
     return Container(
       width: double.infinity,
@@ -1820,7 +2280,12 @@ class _SetupInstructionCard extends StatelessWidget {
         border: Border.all(color: borderColor),
         boxShadow: isDark
             ? null
-            : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)],
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1833,7 +2298,11 @@ class _SetupInstructionCard extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.groups_rounded, color: AppColors.primary, size: 20),
+                child: Icon(
+                  Icons.groups_rounded,
+                  color: AppColors.primary,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -1845,12 +2314,19 @@ class _SetupInstructionCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
-                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                        color: isDark
+                            ? AppColors.textPrimaryDark
+                            : AppColors.textPrimaryLight,
                       ),
                     ),
                     Text(
                       'Required for closed testing to work',
-                      style: TextStyle(fontSize: 11, color: isDark ? AppColors.textHintDark : AppColors.textHintLight),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark
+                            ? AppColors.textHintDark
+                            : AppColors.textHintLight,
+                      ),
                     ),
                   ],
                 ),
@@ -1861,7 +2337,8 @@ class _SetupInstructionCard extends StatelessWidget {
           _Step(
             num: '1',
             title: 'Testers join once',
-            description: 'Share this link with your testers — they join one time and can test all apps on the platform:',
+            description:
+                'Share this link with your testers — they join one time and can test all apps on the platform:',
             highlight: AppConstants.platformGroupUrl,
             isDark: isDark,
             isLink: true,
@@ -1870,7 +2347,8 @@ class _SetupInstructionCard extends StatelessWidget {
           _Step(
             num: '2',
             title: 'Add the group to your Play Console',
-            description: 'In Play Console → Testing → Closed testing → Testers, add this email as a tester group:',
+            description:
+                'In Play Console → Testing → Closed testing → Testers, add this email as a tester group:',
             highlight: AppConstants.platformGroupEmail,
             isDark: isDark,
           ),
@@ -1911,7 +2389,9 @@ class _TestingGuideSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                color: isDark
+                    ? const Color(0xFF334155)
+                    : const Color(0xFFCBD5E1),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1936,7 +2416,9 @@ class _TestingGuideSheet extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF6366F1).withValues(alpha: 0.35),
+                          color: const Color(
+                            0xFF6366F1,
+                          ).withValues(alpha: 0.35),
                           blurRadius: 20,
                           offset: const Offset(0, 6),
                         ),
@@ -1950,8 +2432,11 @@ class _TestingGuideSheet extends StatelessWidget {
                             color: Colors.white.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.science_rounded,
-                              color: Colors.white, size: 32),
+                          child: const Icon(
+                            Icons.science_rounded,
+                            color: Colors.white,
+                            size: 32,
+                          ),
                         ),
                         const SizedBox(height: 14),
                         Text(
@@ -2232,7 +2717,10 @@ class _StepState extends State<_Step> {
   Future<void> _handleTap() async {
     if (widget.highlight == null) return;
     if (widget.isLink) {
-      await launchUrl(Uri.parse(widget.highlight!), mode: LaunchMode.externalApplication);
+      await launchUrl(
+        Uri.parse(widget.highlight!),
+        mode: LaunchMode.externalApplication,
+      );
     } else {
       await Clipboard.setData(ClipboardData(text: widget.highlight!));
       if (!mounted) return;
@@ -2256,9 +2744,14 @@ class _StepState extends State<_Step> {
             shape: BoxShape.circle,
           ),
           child: Center(
-            child: Text(widget.num,
-                style: const TextStyle(
-                    color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+            child: Text(
+              widget.num,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 10),
@@ -2271,7 +2764,9 @@ class _StepState extends State<_Step> {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
-                  color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                 ),
               ),
               const SizedBox(height: 3),
@@ -2279,7 +2774,9 @@ class _StepState extends State<_Step> {
                 widget.description,
                 style: TextStyle(
                   fontSize: 12,
-                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                   height: 1.4,
                 ),
               ),
@@ -2289,7 +2786,10 @@ class _StepState extends State<_Step> {
                   onTap: _handleTap,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: _copied
                           ? const Color(0xFF064E3B)
@@ -2318,23 +2818,29 @@ class _StepState extends State<_Step> {
                         ),
                         const SizedBox(width: 8),
                         widget.isLink
-                            ? const Icon(Icons.open_in_new_rounded,
+                            ? const Icon(
+                                Icons.open_in_new_rounded,
                                 key: ValueKey('open'),
                                 size: 15,
-                                color: Color(0xFF818CF8))
+                                color: Color(0xFF818CF8),
+                              )
                             : AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 200),
                                 child: _copied
-                                    ? const Icon(Icons.check_rounded,
+                                    ? const Icon(
+                                        Icons.check_rounded,
                                         key: ValueKey('check'),
                                         size: 15,
-                                        color: Color(0xFF34D399))
-                                    : Icon(Icons.copy_rounded,
+                                        color: Color(0xFF34D399),
+                                      )
+                                    : Icon(
+                                        Icons.copy_rounded,
                                         key: const ValueKey('copy'),
                                         size: 15,
                                         color: isDark
                                             ? const Color(0xFF64748B)
-                                            : const Color(0xFF94A3B8)),
+                                            : const Color(0xFF94A3B8),
+                                      ),
                               ),
                       ],
                     ),
@@ -2346,9 +2852,10 @@ class _StepState extends State<_Step> {
                     child: Text(
                       'Copied to clipboard',
                       style: const TextStyle(
-                          fontSize: 10,
-                          color: Color(0xFF34D399),
-                          fontWeight: FontWeight.w600),
+                        fontSize: 10,
+                        color: Color(0xFF34D399),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
               ],

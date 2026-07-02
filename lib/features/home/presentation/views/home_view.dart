@@ -1164,172 +1164,180 @@ class _BrowseTabState extends State<_BrowseTab> {
                 ),
               ),
               bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(60),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                  child: Row(
-                    children: [
-                      // ── Search field ──────────────────────────────────
-                      Expanded(
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColors.cardDark : Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: isDark
-                                  ? AppColors.borderDark
-                                  : AppColors.borderLight,
-                            ),
-                            boxShadow: isDark
-                                ? null
-                                : [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.05,
-                                      ),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                          ),
-                          child: TextField(
-                            controller: _searchCtrl,
-                            onChanged: apps.updateSearch,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isDark
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.textPrimaryLight,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'Search apps, developers…',
-                              hintStyle: TextStyle(
-                                fontSize: 13,
-                                color: isDark
-                                    ? AppColors.textHintDark
-                                    : AppColors.textHintLight,
-                              ),
-                              prefixIcon: Icon(
-                                Icons.search_rounded,
-                                size: 20,
-                                color: isDark
-                                    ? AppColors.textHintDark
-                                    : AppColors.textHintLight,
-                              ),
-                              suffixIcon: Obx(
-                                () => apps.browseSearch.value.isNotEmpty
-                                    ? GestureDetector(
-                                        onTap: () {
-                                          _searchCtrl.clear();
-                                          apps.updateSearch('');
-                                        },
-                                        child: Icon(
-                                          Icons.close_rounded,
-                                          size: 18,
-                                          color: isDark
-                                              ? AppColors.textHintDark
-                                              : AppColors.textHintLight,
-                                        ),
-                                      )
-                                    : const SizedBox.shrink(),
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                              ),
-                              isDense: true,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // ── Filter button ─────────────────────────────────
-                      Obx(() {
-                        final count = apps.activeBrowseFilterCount;
-                        return GestureDetector(
-                          onTap: () => _openFilterSheet(apps),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                width: 44,
-                                height: 44,
-                                decoration: BoxDecoration(
-                                  color: count > 0
-                                      ? AppColors.primary
-                                      : (isDark
-                                            ? AppColors.cardDark
-                                            : Colors.white),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: count > 0
-                                        ? AppColors.primary
-                                        : (isDark
-                                              ? AppColors.borderDark
-                                              : AppColors.borderLight),
-                                  ),
-                                  boxShadow: count > 0
-                                      ? [
-                                          BoxShadow(
-                                            color: AppColors.primary.withValues(
-                                              alpha: 0.3,
-                                            ),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 3),
+                preferredSize: const Size.fromHeight(104),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: Row(
+                        children: [
+                          // ── Search field ──────────────────────────────────
+                          Expanded(
+                            child: Container(
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: isDark ? AppColors.cardDark : Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: isDark
+                                      ? AppColors.borderDark
+                                      : AppColors.borderLight,
+                                ),
+                                boxShadow: isDark
+                                    ? null
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.05,
                                           ),
-                                        ]
-                                      : (isDark
-                                            ? null
-                                            : [
-                                                BoxShadow(
-                                                  color: Colors.black
-                                                      .withValues(alpha: 0.05),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ]),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                              ),
+                              child: TextField(
+                                controller: _searchCtrl,
+                                onChanged: apps.updateSearch,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDark
+                                      ? AppColors.textPrimaryDark
+                                      : AppColors.textPrimaryLight,
                                 ),
-                                child: Icon(
-                                  Icons.tune_rounded,
-                                  size: 20,
-                                  color: count > 0
-                                      ? Colors.white
-                                      : (isDark
-                                            ? AppColors.textSecondaryDark
-                                            : AppColors.textSecondaryLight),
+                                decoration: InputDecoration(
+                                  hintText: 'Search apps, developers…',
+                                  hintStyle: TextStyle(
+                                    fontSize: 13,
+                                    color: isDark
+                                        ? AppColors.textHintDark
+                                        : AppColors.textHintLight,
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search_rounded,
+                                    size: 20,
+                                    color: isDark
+                                        ? AppColors.textHintDark
+                                        : AppColors.textHintLight,
+                                  ),
+                                  suffixIcon: Obx(
+                                    () => apps.browseSearch.value.isNotEmpty
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              _searchCtrl.clear();
+                                              apps.updateSearch('');
+                                            },
+                                            child: Icon(
+                                              Icons.close_rounded,
+                                              size: 18,
+                                              color: isDark
+                                                  ? AppColors.textHintDark
+                                                  : AppColors.textHintLight,
+                                            ),
+                                          )
+                                        : const SizedBox.shrink(),
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  isDense: true,
                                 ),
                               ),
-                              if (count > 0)
-                                Positioned(
-                                  top: -5,
-                                  right: -5,
-                                  child: Container(
-                                    width: 18,
-                                    height: 18,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFFF59E0B),
-                                      shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          // ── Filter button ─────────────────────────────────
+                          Obx(() {
+                            final count = apps.activeBrowseFilterCount;
+                            return GestureDetector(
+                              onTap: () => _openFilterSheet(apps),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: count > 0
+                                          ? AppColors.primary
+                                          : (isDark
+                                                ? AppColors.cardDark
+                                                : Colors.white),
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                        color: count > 0
+                                            ? AppColors.primary
+                                            : (isDark
+                                                  ? AppColors.borderDark
+                                                  : AppColors.borderLight),
+                                      ),
+                                      boxShadow: count > 0
+                                          ? [
+                                              BoxShadow(
+                                                color: AppColors.primary.withValues(
+                                                  alpha: 0.3,
+                                                ),
+                                                blurRadius: 10,
+                                                offset: const Offset(0, 3),
+                                              ),
+                                            ]
+                                          : (isDark
+                                                ? null
+                                                : [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withValues(alpha: 0.05),
+                                                      blurRadius: 8,
+                                                      offset: const Offset(0, 2),
+                                                    ),
+                                                  ]),
                                     ),
-                                    child: Center(
-                                      child: Text(
-                                        '$count',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w800,
+                                    child: Icon(
+                                      Icons.tune_rounded,
+                                      size: 20,
+                                      color: count > 0
+                                          ? Colors.white
+                                          : (isDark
+                                                ? AppColors.textSecondaryDark
+                                                : AppColors.textSecondaryLight),
+                                    ),
+                                  ),
+                                  if (count > 0)
+                                    Positioned(
+                                      top: -5,
+                                      right: -5,
+                                      child: Container(
+                                        width: 18,
+                                        height: 18,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFFF59E0B),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            '$count',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                    // ── Quick filter chips ─────────────────────────────
+                    _BrowseQuickChips(isDark: isDark, apps: apps),
+                    const SizedBox(height: 10),
+                  ],
                 ),
               ),
             ),
@@ -1812,6 +1820,208 @@ class _InfoChip extends StatelessWidget {
   }
 }
 
+// ── Browse Quick Filter Chips ───────────────────────────────────────────────
+class _BrowseQuickChips extends StatelessWidget {
+  const _BrowseQuickChips({required this.isDark, required this.apps});
+  final bool isDark;
+  final AppsController apps;
+
+  static const _items = [
+    (BrowseQuickFilter.newest, 'Newest', Icons.auto_awesome_rounded),
+    (BrowseQuickFilter.mostTesters, 'Most Testers', Icons.people_alt_rounded),
+    (BrowseQuickFilter.needTester, 'Need Tester', Icons.person_add_alt_1_rounded),
+    (BrowseQuickFilter.unSwapped, 'Un-Swapped', Icons.swap_horiz_rounded),
+    (BrowseQuickFilter.swapped, 'Swapped', Icons.check_circle_outline_rounded),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36,
+      child: Obx(() {
+        final active = apps.browseQuickFilter.value;
+        return ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: _items.length,
+          separatorBuilder: (_, _) => const SizedBox(width: 8),
+          itemBuilder: (_, i) {
+            final (filter, label, icon) = _items[i];
+            final isActive = active == filter;
+            return GestureDetector(
+              onTap: () => apps.setQuickFilter(filter),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                decoration: BoxDecoration(
+                  gradient: isActive
+                      ? const LinearGradient(
+                          colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        )
+                      : null,
+                  color: isActive
+                      ? null
+                      : (isDark ? AppColors.cardDark : Colors.white),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: isActive
+                        ? Colors.transparent
+                        : (isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight),
+                    width: 1,
+                  ),
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF4F46E5).withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ]
+                      : (isDark
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ]),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 13,
+                      color: isActive
+                          ? Colors.white
+                          : (isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                        color: isActive
+                            ? Colors.white
+                            : (isDark
+                                  ? AppColors.textSecondaryDark
+                                  : AppColors.textSecondaryLight),
+                        letterSpacing: -0.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      }),
+    );
+  }
+}
+
+// ── Premium pill chip base ──────────────────────────────────────────────────
+class _PremiumPillChip extends StatelessWidget {
+  const _PremiumPillChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.28), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 11, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: color,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Tester count + language chips row ──────────────────────────────────────
+class _BrowseTileChips extends StatelessWidget {
+  const _BrowseTileChips({required this.app});
+  final AppListing app;
+
+  @override
+  Widget build(BuildContext context) {
+    // ── Tester chip ───────────────────────────────────────────────────────
+    final Color testerColor;
+    final String testerLabel;
+    final IconData testerIcon;
+
+    if (app.isFull) {
+      testerColor = const Color(0xFF059669);
+      testerLabel = '${app.testerCount} Testers';
+      testerIcon = Icons.check_circle_rounded;
+    } else if (app.testerCount == 0) {
+      testerColor = const Color(0xFFDC2626);
+      testerLabel = 'No Testers Yet';
+      testerIcon = Icons.people_outline_rounded;
+    } else {
+      testerColor = const Color(0xFFF59E0B);
+      testerLabel = '${app.testerCount} Current Testers';
+      testerIcon = Icons.people_rounded;
+    }
+
+    // ── Language chip ─────────────────────────────────────────────────────
+    final langs = app.appLanguages;
+    final langLabel = langs.isEmpty
+        ? 'Unknown'
+        : langs.length > 1
+            ? '${langs.first} +${langs.length - 1}'
+            : langs.first;
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: [
+        _PremiumPillChip(
+          icon: testerIcon,
+          label: testerLabel,
+          color: testerColor,
+        ),
+        _PremiumPillChip(
+          icon: Icons.language_rounded,
+          label: langLabel,
+          color: const Color(0xFF6366F1),
+        ),
+      ],
+    );
+  }
+}
+
 class _BrowseTile extends StatelessWidget {
   const _BrowseTile({required this.app, required this.isDark});
   final AppListing app;
@@ -1879,24 +2089,8 @@ class _BrowseTile extends StatelessWidget {
                                 : AppColors.textSecondaryLight,
                           ),
                         ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            _MiniChip(
-                              icon: Icons.people_outline_rounded,
-                              label: '${app.testerCount}/${app.testersNeeded}',
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            _MiniChip(
-                              icon: Icons.schedule_rounded,
-                              label: '${app.daysLeft}d',
-                              color: app.daysLeft <= 3
-                                  ? const Color(0xFFDC2626)
-                                  : const Color(0xFF059669),
-                            ),
-                          ],
-                        ),
+                        const SizedBox(height: 6),
+                        _BrowseTileChips(app: app),
                       ],
                     ),
                   ),
@@ -1911,160 +2105,167 @@ class _BrowseTile extends StatelessWidget {
                 color: isDark ? AppColors.borderDark : AppColors.dividerLight,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                 child: Obx(() {
                   final uid =
                       Get.find<AuthController>().currentUser.value?.uid ?? '';
                   final swaps = Get.find<SwapController>();
-                  final chat = Get.find<ChatController>();
                   final alreadySwapped = app.testerIds.contains(uid);
-                  final hasPending = swaps.hasPendingSentRequestTo(app.id);
+                  final pendingReq = swaps.pendingSentRequestTo(app.id);
 
-                  // Chat room shared with this app's owner (only exists after
-                  // a swap is accepted).
-                  final chatRoom = alreadySwapped
-                      ? chat.rooms.firstWhereOrNull(
-                          (r) =>
-                              r.participantIds.contains(uid) &&
-                              r.participantIds.contains(app.ownerId),
-                        )
-                      : null;
-
-                  final Color swapColor;
-                  final IconData swapIcon;
-                  final String swapLabel;
-                  final VoidCallback? swapPress;
-
+                  // ── Swapped (accepted) ─────────────────────────────────
                   if (alreadySwapped) {
-                    swapColor = const Color(0xFF059669);
-                    swapIcon = Icons.check_circle_outline_rounded;
-                    swapLabel = 'Swapped';
-                    swapPress = null;
-                  } else if (hasPending) {
-                    swapColor = const Color(0xFFF59E0B);
-                    swapIcon = Icons.hourglass_top_rounded;
-                    swapLabel = 'Pending';
-                    swapPress = () => Get.snackbar(
-                      '',
-                      'Request sent — waiting for their response.',
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: const Color(0xFFF59E0B),
-                      colorText: Colors.white,
-                      margin: const EdgeInsets.all(16),
-                      borderRadius: 12,
-                      duration: const Duration(seconds: 3),
-                      titleText: const SizedBox.shrink(),
-                    );
-                  } else {
-                    swapColor = const Color(0xFF6366F1);
-                    swapIcon = Icons.swap_horiz_rounded;
-                    swapLabel = 'Swap';
-                    swapPress = () => _openSwapSheet(context);
-                  }
-
-                  return Row(
-                    children: [
-                      // View App button
-                      Expanded(
-                        child: SizedBox(
-                          height: 34,
-                          child: ElevatedButton.icon(
-                            onPressed: () => Get.toNamed(
-                              AppRoutes.appDetail,
-                              arguments: app,
-                            ),
-                            icon: const Icon(
-                              Icons.info_outline_rounded,
-                              size: 14,
-                            ),
-                            label: const Text(
-                              'View App',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(9),
-                              ),
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                            ),
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 38,
+                      child: OutlinedButton.icon(
+                        onPressed: null,
+                        icon: const Icon(Icons.check_circle_rounded, size: 15),
+                        label: const Text(
+                          'Swapped',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF059669),
+                          disabledForegroundColor:
+                              const Color(0xFF059669).withValues(alpha: 0.85),
+                          side: BorderSide(
+                            color: const Color(0xFF059669).withValues(alpha: 0.4),
+                          ),
+                          backgroundColor:
+                              const Color(0xFF059669).withValues(alpha: 0.08),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      // Chat button — only when swap is accepted
-                      if (alreadySwapped) ...[
-                        SizedBox(
-                          height: 34,
-                          child: OutlinedButton.icon(
-                            onPressed: chatRoom != null
-                                ? () => chat.openChat(chatRoom)
-                                : null,
-                            icon: const Icon(
-                              Icons.chat_bubble_outline_rounded,
-                              size: 14,
-                            ),
-                            label: const Text(
-                              'Chat',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                    );
+                  }
+
+                  // ── Pending + Cancel ───────────────────────────────────
+                  if (pendingReq != null) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 38,
+                            child: OutlinedButton.icon(
+                              onPressed: null,
+                              icon: const Icon(
+                                Icons.hourglass_top_rounded,
+                                size: 14,
                               ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF0891B2),
-                              side: const BorderSide(color: Color(0xFF0891B2)),
-                              backgroundColor: const Color(
-                                0xFF0891B2,
-                              ).withValues(alpha: 0.08),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(9),
+                              label: const Text(
+                                'Pending',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFFF59E0B),
+                                disabledForegroundColor:
+                                    const Color(0xFFF59E0B)
+                                        .withValues(alpha: 0.85),
+                                side: BorderSide(
+                                  color: const Color(0xFFF59E0B)
+                                      .withValues(alpha: 0.4),
+                                ),
+                                backgroundColor: const Color(0xFFF59E0B)
+                                    .withValues(alpha: 0.08),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
                               ),
-                              minimumSize: const Size(0, 34),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
-                      ],
-                      OutlinedButton.icon(
-                        onPressed: swapPress,
-                        icon: Icon(swapIcon, size: 14),
-                        label: Text(
-                          swapLabel,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                        SizedBox(
+                          height: 38,
+                          child: OutlinedButton.icon(
+                            onPressed: () => swaps.cancelRequest(pendingReq),
+                            icon: const Icon(Icons.close_rounded, size: 14),
+                            label: const Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFFDC2626),
+                              side: BorderSide(
+                                color: const Color(0xFFDC2626)
+                                    .withValues(alpha: 0.5),
+                              ),
+                              backgroundColor: const Color(0xFFDC2626)
+                                  .withValues(alpha: 0.06),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              minimumSize: const Size(0, 38),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
                           ),
                         ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: swapColor,
-                          side: BorderSide(color: swapColor),
-                          backgroundColor: hasPending || alreadySwapped
-                              ? swapColor.withValues(alpha: 0.08)
-                              : null,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(9),
+                      ],
+                    );
+                  }
+
+                  // ── Default: Swap ──────────────────────────────────────
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 38,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF4F46E5).withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          minimumSize: const Size(0, 34),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _openSwapSheet(context),
+                          borderRadius: BorderRadius.circular(10),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.swap_horiz_rounded,
+                                size: 17,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'Swap',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ],
+                    ),
                   );
                 }),
               ),
@@ -3755,8 +3956,9 @@ class _ProfileSettingsSection extends StatelessWidget {
     final uri = Uri.parse(
       'https://play.google.com/store/apps/details?id=com.testermandi.app',
     );
-    if (await canLaunchUrl(uri))
+    if (await canLaunchUrl(uri)) {
       launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   void _shareApp() {
@@ -5313,36 +5515,6 @@ class _AppIcon extends StatelessWidget {
     ),
     child: Icon(Icons.android_rounded, color: Colors.white, size: size * 0.55),
   );
-}
-
-class _MiniChip extends StatelessWidget {
-  const _MiniChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 12, color: color.withValues(alpha: 0.8)),
-        const SizedBox(width: 3),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: color.withValues(alpha: 0.8),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
 }
 
 class _NavItem extends StatelessWidget {

@@ -74,11 +74,27 @@ class SwapController extends GetxController {
   }
 
   /// True if the current user has any non-denied sent request targeting [toAppId].
-  /// Used by browse cards to show the "Pending" state.
   bool hasPendingSentRequestTo(String toAppId) {
     return sentRequests.any(
       (r) => r.toAppId == toAppId && r.status != SwapStatus.denied,
     );
+  }
+
+  /// Returns the pending (not yet accepted/denied) sent request for [toAppId], or null.
+  SwapRequest? pendingSentRequestTo(String toAppId) {
+    return sentRequests.firstWhereOrNull(
+      (r) => r.toAppId == toAppId && r.status == SwapStatus.pending,
+    );
+  }
+
+  Future<void> cancelRequest(SwapRequest request) async {
+    try {
+      await _repo.cancelRequest(request.id);
+      _snack('Swap request cancelled.', success: true);
+    } catch (e) {
+      debugPrint('[SwapController] cancelRequest error: $e');
+      _snack('Failed to cancel request.');
+    }
   }
 
   /// True if a non-denied request or active participation already exists for

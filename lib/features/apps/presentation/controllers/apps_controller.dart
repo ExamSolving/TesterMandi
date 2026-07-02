@@ -17,6 +17,8 @@ import '../../domain/entities/app_listing.dart';
 import '../../domain/repositories/apps_repository.dart';
 import '../../data/models/app_listing_model.dart';
 
+enum BrowseQuickFilter { newest, mostTesters, needTester, unSwapped, swapped }
+
 class AppsController extends GetxController {
   AppsController(this._repo);
   final AppsRepository _repo;
@@ -35,10 +37,12 @@ class AppsController extends GetxController {
   final browseSearch = ''.obs;
   final browseFilterCountry = Rx<String?>(null);
   final browseFilterLanguage = Rx<String?>(null);
+  final browseQuickFilter = BrowseQuickFilter.newest.obs;
 
   // ── Multi-step form ────────────────────────────────────────────────────────
   /// 0 = Package  |  1 = Details  |  2 = Submit
   final currentStep = 0.obs;
+  final editingAppId = Rx<String?>(null);
 
   final formKey = GlobalKey<FormState>();
   final nameCtrl = TextEditingController();
@@ -105,7 +109,30 @@ class AppsController extends GetxController {
   }
 
   void prevStep() {
+    if (editingAppId.value != null && currentStep.value == 0) {
+      Get.back();
+      return;
+    }
     if (currentStep.value > 0) currentStep.value--;
+  }
+
+  void fillFormForEdit(AppListing app) {
+    _clearForm();
+    editingAppId.value = app.id;
+    nameCtrl.text = app.appName;
+    descCtrl.text = app.description;
+    packageCtrl.text = app.packageName;
+    optInCtrl.text = app.optInUrl;
+    latestVersionCtrl.text = app.latestVersion ?? '';
+    testingInstructionsCtrl.text = app.testingInstructions ?? '';
+    selectedAppCategory.value = app.category;
+    testersNeeded.value = app.testersNeeded;
+    selectedMinAndroid.value = app.minAndroidLevel;
+    selectedCountries.value = List<String>.from(app.targetCountries);
+    selectedLanguages.value = List<String>.from(app.appLanguages);
+    if (app.iconUrl != null) fetchedIconUrl.value = app.iconUrl;
+    groupConfirmed.value = true;
+    currentStep.value = 0;
   }
 
   // ── Country / Language toggles ─────────────────────────────────────────────
@@ -289,7 +316,7 @@ class AppsController extends GetxController {
   String get _uid => Get.find<AuthController>().currentUser.value?.uid ?? '';
 
   List<AppListing> get browsableApps =>
-      allApps.where((a) => a.ownerId != _uid).toList();
+      allApps.where((a) => a.ownerId != _uid && !a.paused).toList();
 
   List<AppListing> get filteredBrowse {
     var list = browsableApps;
@@ -321,6 +348,25 @@ class AppsController extends GetxController {
           .toList();
     }
 
+    final uid = _uid;
+    switch (browseQuickFilter.value) {
+      case BrowseQuickFilter.newest:
+        list = List.from(list)
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      case BrowseQuickFilter.mostTesters:
+        list = List.from(list)
+          ..sort((a, b) => b.testerCount.compareTo(a.testerCount));
+      case BrowseQuickFilter.needTester:
+        list = (list.where((a) => !a.isFull).toList())
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      case BrowseQuickFilter.unSwapped:
+        list = (list.where((a) => !a.testerIds.contains(uid)).toList())
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      case BrowseQuickFilter.swapped:
+        list = (list.where((a) => a.testerIds.contains(uid)).toList())
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+
     return list;
   }
 
@@ -332,13 +378,36 @@ class AppsController extends GetxController {
     return n;
   }
 
+  void setQuickFilter(BrowseQuickFilter f) => browseQuickFilter.value = f;
+
   void clearBrowseFilters() {
     selectedCategory.value = null;
     browseFilterCountry.value = null;
     browseFilterLanguage.value = null;
+    browseQuickFilter.value = BrowseQuickFilter.newest;
   }
 
   void filterByLanguage(String? lang) => browseFilterLanguage.value = lang;
+
+  Future<bool> checkIsInstalled(String packageName) async {
+    try {
+      final raw = await _appInfoChannel
+          .invokeMethod<Map>('isAppInstalled', {'packageId': packageName});
+      return raw?['installed'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> launchApp(String packageName) async {
+    try {
+      final result = await _appInfoChannel
+          .invokeMethod<bool>('launchApp', {'packageId': packageName});
+      return result == true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   void onInit() {
@@ -402,9 +471,95 @@ class AppsController extends GetxController {
   void filterByCountry(String? country) => browseFilterCountry.value = country;
   void updateSearch(String q) => browseSearch.value = q;
 
+  Future<bool> updateApp(
+    String appId, {
+    required String name,
+    required String desc,
+    required AppCategory category,
+    String? version,
+    String? minAndroid,
+    required String optInUrl,
+    String? instructions,
+    required int testersNeeded,
+    required List<String> countries,
+    required List<String> languages,
+  }) async {
+    if (name.trim().isEmpty) {
+      _snack('App name cannot be empty');
+      return false;
+    }
+    isLoading.value = true;
+    try {
+      final fields = <String, dynamic>{
+        'appName': name.trim(),
+        'description': desc.trim(),
+        'category': category.name,
+        'optInUrl': optInUrl.trim(),
+        'testersNeeded': testersNeeded,
+        'targetCountries': countries,
+        'appLanguages': languages,
+        'latestVersion': (version ?? '').trim().isNotEmpty
+            ? version!.trim()
+            : FieldValue.delete(),
+        'minAndroidLevel': minAndroid ?? FieldValue.delete(),
+        'testingInstructions': (instructions ?? '').trim().isNotEmpty
+            ? instructions!.trim()
+            : FieldValue.delete(),
+      };
+      await _repo.updateApp(appId, fields);
+      _snack('App updated!', success: true);
+      return true;
+    } catch (e) {
+      debugPrint('[AppsController] updateApp error: $e');
+      _snack('Failed to update app.');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> togglePauseListing(AppListing app) async {
+    final newPaused = !app.paused;
+    try {
+      await _repo.togglePauseListing(app.id, paused: newPaused);
+      _snack(
+        newPaused ? 'Listing paused — hidden from browse.' : 'Listing resumed — visible in browse.',
+        success: true,
+      );
+    } catch (e) {
+      debugPrint('[AppsController] togglePauseListing error: $e');
+      _snack('Failed to update listing status.');
+    }
+  }
+
   /// Returns the posted app name on success, null on failure.
   Future<String?> submitApp() async {
     if (!formKey.currentState!.validate()) return null;
+
+    // ── Edit mode: update existing listing ──────────────────────────────────
+    final editId = editingAppId.value;
+    if (editId != null) {
+      final ok = await updateApp(
+        editId,
+        name: nameCtrl.text.trim(),
+        desc: descCtrl.text.trim(),
+        category: selectedAppCategory.value ?? AppCategory.other,
+        version: latestVersionCtrl.text.trim().isEmpty
+            ? null
+            : latestVersionCtrl.text.trim(),
+        minAndroid: selectedMinAndroid.value,
+        optInUrl: optInCtrl.text.trim(),
+        instructions: testingInstructionsCtrl.text.trim().isEmpty
+            ? null
+            : testingInstructionsCtrl.text.trim(),
+        testersNeeded: testersNeeded.value,
+        countries: List<String>.from(selectedCountries),
+        languages: List<String>.from(selectedLanguages),
+      );
+      return ok ? nameCtrl.text.trim() : null;
+    }
+
+    // ── Add mode: create new listing ────────────────────────────────────────
     isLoading.value = true;
     try {
       final auth = Get.find<AuthController>();
@@ -502,6 +657,7 @@ class AppsController extends GetxController {
     packageAlreadyListed.value = false;
     groupConfirmed.value = false;
     currentStep.value = 0;
+    editingAppId.value = null;
   }
 
   void _snack(String msg, {bool success = false}) {

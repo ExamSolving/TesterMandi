@@ -20,6 +20,7 @@ class AppListingModel extends AppListing {
     super.latestVersion,
     super.minAndroidLevel,
     super.testingInstructions,
+    super.paused,
   });
 
   factory AppListingModel.fromFirestore(DocumentSnapshot doc) {
@@ -42,6 +43,7 @@ class AppListingModel extends AppListing {
       latestVersion: d['latestVersion'] as String?,
       minAndroidLevel: d['minAndroidLevel'] as String?,
       testingInstructions: d['testingInstructions'] as String?,
+      paused: d['paused'] as bool? ?? false,
     );
   }
 
@@ -62,6 +64,7 @@ class AppListingModel extends AppListing {
         if (latestVersion != null) 'latestVersion': latestVersion,
         if (minAndroidLevel != null) 'minAndroidLevel': minAndroidLevel,
         if (testingInstructions != null) 'testingInstructions': testingInstructions,
+        'paused': paused,
       };
 
   static AppCategory _parseCategory(String? v) => AppCategory.values

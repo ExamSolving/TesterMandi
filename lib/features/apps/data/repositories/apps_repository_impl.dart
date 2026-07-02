@@ -82,6 +82,16 @@ class AppsRepositoryImpl implements AppsRepository {
   }
 
   @override
+  Future<void> togglePauseListing(String appId, {required bool paused}) async {
+    await _col.doc(appId).update({'paused': paused});
+  }
+
+  @override
+  Future<void> updateApp(String appId, Map<String, dynamic> fields) async {
+    await _col.doc(appId).update(fields);
+  }
+
+  @override
   Future<void> notifyNewAppListed({
     required String appId,
     required String appName,

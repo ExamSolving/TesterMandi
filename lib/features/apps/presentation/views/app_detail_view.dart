@@ -2,14 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../../swaps/domain/entities/swap_request.dart';
 import '../../../swaps/presentation/controllers/swap_controller.dart';
 import '../../../swaps/presentation/views/swap_pick_app_sheet.dart';
 import '../../../testing/presentation/controllers/testing_controller.dart';
 import '../../domain/entities/app_listing.dart';
+import '../controllers/apps_controller.dart';
+import 'add_app_view.dart';
 
 class AppDetailView extends StatefulWidget {
   const AppDetailView({super.key});
@@ -50,10 +52,19 @@ class _AppDetailViewState extends State<AppDetailView>
   }
 
   Future<void> _launch(String url) async {
-    final uri = Uri.tryParse(url);
+    var raw = url.trim();
+    if (raw.isEmpty) return;
+    if (!raw.startsWith('http://') && !raw.startsWith('https://')) {
+      raw = 'https://$raw';
+    }
+    final uri = Uri.tryParse(raw);
     if (uri == null) return;
-    if (await canLaunchUrl(uri)) {
+    try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      try {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      } catch (_) {}
     }
   }
 
@@ -73,77 +84,46 @@ class _AppDetailViewState extends State<AppDetailView>
         opacity: _fadeIn,
         child: CustomScrollView(
           slivers: [
-            _HeroAppBar(app: app, isDark: isDark),
+            _HeroAppBar(
+              app: app,
+              isDark: isDark,
+              showDays: _alreadyTesting,
+            ),
             SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Quick links ─────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    child: _QuickLinks(app: app, isDark: isDark, onLaunch: _launch),
-                  ),
-                  // ── Developer card ──────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                    child: _DeveloperCard(app: app, isDark: isDark),
-                  ),
-                  // ── Stats row ───────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                    child: _StatsRow(app: app, isDark: isDark),
-                  ),
-                  // ── Description ─────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    child: _Section(
-                      icon: Icons.description_outlined,
-                      title: 'About this app',
-                      isDark: isDark,
-                      child: Text(
-                        app.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 1.65,
-                          color: isDark
-                              ? AppColors.textSecondaryDark
-                              : AppColors.textSecondaryLight,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // ── Testing Instructions (only if provided) ─────
-                  if (app.testingInstructions != null &&
-                      app.testingInstructions!.trim().isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                      child: _TestingInstructionsCard(
-                        instructions: app.testingInstructions!.trim(),
-                        isDark: isDark,
-                      ),
-                    ),
-                  // ── App info grid ───────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                    child: _AppInfoGrid(app: app, isDark: isDark),
-                  ),
-                  // ── Countries & Languages ───────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                    child: _TagsSection(app: app, isDark: isDark),
-                  ),
-                  // ── Action button ───────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-                    child: _ActionArea(
-                      app: app,
-                      isDark: isDark,
-                      isOwner: isOwner,
-                      checking: _checking,
-                      alreadyTesting: _alreadyTesting,
-                    ),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Quick links — non-owner only
+                    if (!isOwner) ...[
+                      _QuickLinks(app: app, isDark: isDark, onLaunch: _launch),
+                      const SizedBox(height: 16),
+                    ],
+                    // Overview card
+                    if (!isOwner)
+                      _OverviewCard(app: app, isDark: isDark, showDays: _alreadyTesting)
+                    else
+                      _OwnerStatsCard(app: app, isDark: isDark),
+                    const SizedBox(height: 14),
+                    // About
+                    _AboutCard(app: app, isDark: isDark),
+                    const SizedBox(height: 14),
+                    // Testing instructions
+                    if (app.testingInstructions != null && app.testingInstructions!.trim().isNotEmpty) ...[
+                      _TestingInstructionsCard(instructions: app.testingInstructions!.trim(), isDark: isDark),
+                      const SizedBox(height: 14),
+                    ],
+                    // Listing details
+                    _ListingDetailsCard(app: app, isDark: isDark),
+                    const SizedBox(height: 20),
+                    // Action
+                    if (isOwner)
+                      _OwnerActionPanel(app: app, isDark: isDark)
+                    else
+                      _SwapActionArea(app: app, isDark: isDark, checking: _checking, alreadyTesting: _alreadyTesting),
+                  ],
+                ),
               ),
             ),
           ],
@@ -156,9 +136,10 @@ class _AppDetailViewState extends State<AppDetailView>
 // ── Hero App Bar ────────────────────────────────────────────────────────────
 
 class _HeroAppBar extends StatelessWidget {
-  const _HeroAppBar({required this.app, required this.isDark});
+  const _HeroAppBar({required this.app, required this.isDark, required this.showDays});
   final AppListing app;
   final bool isDark;
+  final bool showDays;
 
   @override
   Widget build(BuildContext context) {
@@ -273,16 +254,18 @@ class _HeroAppBar extends StatelessWidget {
                         label: app.categoryLabel,
                         color: Colors.white.withValues(alpha: 0.18),
                       ),
-                      const SizedBox(width: 8),
-                      _HeroBadge(
-                        label: app.isFull
-                            ? 'Testing Full'
-                            : app.daysLeft <= 3
-                                ? '⚠ ${app.daysLeft}d left'
-                                : '${app.daysLeft}d left',
-                        color: statusColor.withValues(alpha: 0.85),
-                        isSolid: true,
-                      ),
+                      if (showDays) ...[
+                        const SizedBox(width: 8),
+                        _HeroBadge(
+                          label: app.isFull
+                              ? 'Testing Full'
+                              : app.daysLeft <= 3
+                                  ? '⚠ ${app.daysLeft}d left'
+                                  : '${app.daysLeft}d left',
+                          color: statusColor.withValues(alpha: 0.85),
+                          isSolid: true,
+                        ),
+                      ],
                     ],
                   ),
                 ],
@@ -344,41 +327,689 @@ class _HeroBadge extends StatelessWidget {
   }
 }
 
+// ── Overview Card (non-owner) ────────────────────────────────────────────────
+
+class _OverviewCard extends StatelessWidget {
+  const _OverviewCard({required this.app, required this.isDark, required this.showDays});
+  final AppListing app;
+  final bool isDark;
+  final bool showDays;
+
+  String _formatDate(DateTime dt) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = app.ownerName.trim().split(' ').take(2)
+        .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '')
+        .join();
+    final progress = (app.testerCount / app.testersNeeded).clamp(0.0, 1.0);
+    final slotsLeft = app.testersNeeded - app.testerCount;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.04), blurRadius: 10, offset: const Offset(0, 3))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Developer row
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    initials.isNotEmpty ? initials : '?',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      app.ownerName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Developer',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Copy package pill
+              GestureDetector(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: app.packageName));
+                  Get.snackbar('Copied', app.packageName,
+                      duration: const Duration(seconds: 2),
+                      snackPosition: SnackPosition.BOTTOM);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.copy_rounded, size: 12, color: AppColors.primary),
+                      const SizedBox(width: 5),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 100),
+                        child: Text(
+                          app.packageName,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 20),
+          // Tester progress
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Icon(Icons.people_rounded, color: Colors.white, size: 16),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Tester Slots',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  ),
+                ),
+              ),
+              Text(
+                '${app.testerCount} / ${app.testersNeeded}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Progress bar
+          Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: app.isFull
+                        ? [const Color(0xFFDC2626), const Color(0xFFEF4444)]
+                        : [const Color(0xFF4F46E5), const Color(0xFF7C3AED)],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            app.isFull
+                ? 'All slots filled'
+                : '$slotsLeft slot${slotsLeft == 1 ? '' : 's'} remaining',
+            style: TextStyle(
+              fontSize: 11,
+              color: app.isFull
+                  ? const Color(0xFFDC2626)
+                  : (isDark ? AppColors.textHintDark : AppColors.textHintLight),
+            ),
+          ),
+          const Divider(height: 20),
+          // Listed date row
+          Row(
+            children: [
+              Icon(Icons.calendar_today_rounded, size: 15,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Listed ${_formatDate(app.createdAt.toDate())}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                ),
+              ),
+              if (showDays)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: (app.daysLeft <= 3 ? const Color(0xFFDC2626) : const Color(0xFF059669))
+                        .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: (app.daysLeft <= 3 ? const Color(0xFFDC2626) : const Color(0xFF059669))
+                          .withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Text(
+                    '${app.daysLeft}d left',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: app.daysLeft <= 3 ? const Color(0xFFDC2626) : const Color(0xFF059669),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Owner Stats Card (owner view) ────────────────────────────────────────────
+
+class _OwnerStatsCard extends StatelessWidget {
+  const _OwnerStatsCard({required this.app, required this.isDark});
+  final AppListing app;
+  final bool isDark;
+
+  String _formatDate(DateTime dt) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = (app.testerCount / app.testersNeeded).clamp(0.0, 1.0);
+    final slotsLeft = app.testersNeeded - app.testerCount;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.04), blurRadius: 10, offset: const Offset(0, 3))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Tester progress
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: const Icon(Icons.people_rounded, color: Colors.white, size: 16),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Tester Slots',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                  ),
+                ),
+              ),
+              Text(
+                '${app.testerCount} / ${app.testersNeeded}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          // Progress bar
+          Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: app.isFull
+                        ? [const Color(0xFFDC2626), const Color(0xFFEF4444)]
+                        : [const Color(0xFF4F46E5), const Color(0xFF7C3AED)],
+                  ),
+                  borderRadius: BorderRadius.circular(6),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            app.isFull
+                ? 'All slots filled'
+                : '$slotsLeft slot${slotsLeft == 1 ? '' : 's'} remaining',
+            style: TextStyle(
+              fontSize: 11,
+              color: app.isFull
+                  ? const Color(0xFFDC2626)
+                  : (isDark ? AppColors.textHintDark : AppColors.textHintLight),
+            ),
+          ),
+          const Divider(height: 20),
+          // Listed date row
+          Row(
+            children: [
+              Icon(Icons.calendar_today_rounded, size: 15,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight),
+              const SizedBox(width: 8),
+              Text(
+                'Listed ${_formatDate(app.createdAt.toDate())}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── About Card ───────────────────────────────────────────────────────────────
+
+class _AboutCard extends StatelessWidget {
+  const _AboutCard({required this.app, required this.isDark});
+  final AppListing app;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.04), blurRadius: 10, offset: const Offset(0, 3))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'ABOUT',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+            ),
+          ),
+          const SizedBox(height: 10),
+          app.description.trim().isEmpty
+              ? Text(
+                  'No description provided.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    height: 1.7,
+                    color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
+                  ),
+                )
+              : Text(
+                  app.description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.7,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Listing Details Card ─────────────────────────────────────────────────────
+
+class _ListingDetailsCard extends StatelessWidget {
+  const _ListingDetailsCard({required this.app, required this.isDark});
+  final AppListing app;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasCountries = app.targetCountries.isNotEmpty &&
+        !(app.targetCountries.length == 1 && app.targetCountries.first == 'All');
+    final hasLangs = app.appLanguages.isNotEmpty;
+
+    final showVersion = app.latestVersion != null && app.latestVersion!.isNotEmpty;
+    final showMinAndroid = app.minAndroidLevel != null && app.minAndroidLevel!.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.cardDark : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? AppColors.borderDark : AppColors.borderLight),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.04), blurRadius: 10, offset: const Offset(0, 3))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'LISTING DETAILS',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0,
+              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _DetailRow(
+            icon: Icons.category_outlined,
+            label: 'Category',
+            value: app.categoryLabel,
+            isDark: isDark,
+          ),
+          if (showVersion) ...[
+            const SizedBox(height: 12),
+            _DetailRow(
+              icon: Icons.new_releases_outlined,
+              label: 'Version',
+              value: 'v${app.latestVersion}',
+              isDark: isDark,
+            ),
+          ],
+          if (showMinAndroid) ...[
+            const SizedBox(height: 12),
+            _DetailRow(
+              icon: Icons.android_rounded,
+              label: 'Min Android',
+              value: app.minAndroidLevel!,
+              isDark: isDark,
+            ),
+          ],
+          if (hasCountries) ...[
+            const Divider(height: 24),
+            Row(
+              children: [
+                Icon(Icons.public_rounded, size: 15, color: const Color(0xFF0891B2)),
+                const SizedBox(width: 7),
+                Text(
+                  'Target Countries',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: app.targetCountries
+                  .map((c) => _MiniTag(c, const Color(0xFF0891B2), isDark))
+                  .toList(),
+            ),
+          ],
+          if (hasLangs) ...[
+            SizedBox(height: hasCountries ? 12 : 0),
+            if (!hasCountries) const Divider(height: 24),
+            if (hasCountries) const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.translate_rounded, size: 15, color: const Color(0xFF7C3AED)),
+                const SizedBox(width: 7),
+                Text(
+                  'Languages',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: app.appLanguages
+                  .map((l) => _MiniTag(l, const Color(0xFF7C3AED), isDark))
+                  .toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Detail Row ───────────────────────────────────────────────────────────────
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.icon, required this.label, required this.value, required this.isDark});
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 32, height: 32,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: AppColors.primary),
+        ),
+        const SizedBox(width: 12),
+        Expanded(child: Text(label, style: TextStyle(fontSize: 13, color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight))),
+        Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)),
+      ],
+    );
+  }
+}
+
+// ── Mini Tag ─────────────────────────────────────────────────────────────────
+
+class _MiniTag extends StatelessWidget {
+  const _MiniTag(this.label, this.color, this.isDark);
+  final String label;
+  final Color color;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.15 : 0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
+    );
+  }
+}
+
 // ── Quick Links ─────────────────────────────────────────────────────────────
 
-class _QuickLinks extends StatelessWidget {
+class _QuickLinks extends StatefulWidget {
   const _QuickLinks({required this.app, required this.isDark, required this.onLaunch});
   final AppListing app;
   final bool isDark;
   final Future<void> Function(String) onLaunch;
 
   @override
+  State<_QuickLinks> createState() => _QuickLinksState();
+}
+
+class _QuickLinksState extends State<_QuickLinks> with WidgetsBindingObserver {
+  bool _isInstalled = false;
+  bool _checking = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkInstalled();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // Re-check when user returns from Play Store / app launcher.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_isInstalled) {
+      _checkInstalled();
+    }
+  }
+
+  Future<void> _checkInstalled() async {
+    final installed = await Get.find<AppsController>()
+        .checkIsInstalled(widget.app.packageName);
+    if (mounted) setState(() { _isInstalled = installed; _checking = false; });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final hasGroup = app.optInUrl.isNotEmpty;
+    final hasGroup = widget.app.optInUrl.isNotEmpty;
+
+    // Second button priority:
+    //   1. Installed → Open App
+    //   2. Not installed + has group URL → Join Group
+    //   3. Neither → Install App takes full width
+    Widget? secondBtn;
+    if (_isInstalled) {
+      secondBtn = _QuickLinkBtn(
+        icon: Icons.open_in_new_rounded,
+        label: 'Open App',
+        sublabel: 'Already Installed',
+        gradient: const [Color(0xFF059669), Color(0xFF10B981)],
+        onTap: () => Get.find<AppsController>().launchApp(widget.app.packageName),
+      );
+    } else if (hasGroup) {
+      secondBtn = _QuickLinkBtn(
+        icon: Icons.group_add_rounded,
+        label: 'Join Group',
+        sublabel: 'Tester Community',
+        gradient: const [Color(0xFF7C3AED), Color(0xFFDB2777)],
+        onTap: () => widget.onLaunch(widget.app.optInUrl),
+      );
+    }
+
     return Row(
       children: [
         Expanded(
           child: _QuickLinkBtn(
-            icon: Icons.play_arrow_rounded,
+            icon: _checking
+                ? Icons.hourglass_empty_rounded
+                : Icons.play_arrow_rounded,
             label: 'Install App',
-            sublabel: 'Play Store',
+            sublabel: _checking ? 'Checking…' : 'Play Store',
             gradient: const [Color(0xFF0EA5E9), Color(0xFF2563EB)],
-            onTap: () => onLaunch(
-              'https://play.google.com/store/apps/details?id=${app.packageName}',
-            ),
+            onTap: _checking
+                ? null
+                : () => widget.onLaunch(
+                      'https://play.google.com/store/apps/details?id=${widget.app.packageName}',
+                    ),
           ),
         ),
-        if (hasGroup) ...[
+        if (secondBtn != null) ...[
           const SizedBox(width: 12),
-          Expanded(
-            child: _QuickLinkBtn(
-              icon: Icons.group_add_rounded,
-              label: 'Join Group',
-              sublabel: 'Tester Community',
-              gradient: const [Color(0xFF7C3AED), Color(0xFFDB2777)],
-              onTap: () => onLaunch(app.optInUrl),
-            ),
-          ),
+          Expanded(child: secondBtn),
         ],
       ],
     );
@@ -391,13 +1022,13 @@ class _QuickLinkBtn extends StatelessWidget {
     required this.label,
     required this.sublabel,
     required this.gradient,
-    required this.onTap,
+    this.onTap,
   });
   final IconData icon;
   final String label;
   final String sublabel;
   final List<Color> gradient;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -459,422 +1090,6 @@ class _QuickLinkBtn extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-// ── Developer Card ──────────────────────────────────────────────────────────
-
-class _DeveloperCard extends StatelessWidget {
-  const _DeveloperCard({required this.app, required this.isDark});
-  final AppListing app;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final initials = app.ownerName.trim().split(' ').take(2)
-        .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '')
-        .join();
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                initials.isNotEmpty ? initials : '?',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  app.ownerName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    color: isDark
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'App Developer',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark
-                        ? AppColors.textHintDark
-                        : AppColors.textHintLight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Package name copy pill
-          GestureDetector(
-            onTap: () {
-              Clipboard.setData(ClipboardData(text: app.packageName));
-              Get.snackbar('Copied', app.packageName,
-                  duration: const Duration(seconds: 2),
-                  snackPosition: SnackPosition.BOTTOM);
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.copy_rounded,
-                      size: 12, color: AppColors.primary),
-                  const SizedBox(width: 5),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 100),
-                    child: Text(
-                      app.packageName,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Stats Row ───────────────────────────────────────────────────────────────
-
-class _StatsRow extends StatelessWidget {
-  const _StatsRow({required this.app, required this.isDark});
-  final AppListing app;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = (app.testerCount / app.testersNeeded).clamp(0.0, 1.0);
-    final daysUrgent = app.daysLeft <= 3;
-    final daysColor = daysUrgent ? const Color(0xFFDC2626) : const Color(0xFF059669);
-
-    return Column(
-      children: [
-        // Tester progress card
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.cardDark : Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isDark ? AppColors.borderDark : AppColors.borderLight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(9),
-                    ),
-                    child: const Icon(Icons.people_rounded,
-                        color: Colors.white, size: 16),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Tester Slots',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        color: isDark
-                            ? AppColors.textPrimaryDark
-                            : AppColors.textPrimaryLight,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${app.testerCount} / ${app.testersNeeded} joined',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Gradient progress bar
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: progress,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: app.isFull
-                            ? [const Color(0xFFDC2626), const Color(0xFFEF4444)]
-                            : [const Color(0xFF4F46E5), const Color(0xFF7C3AED)],
-                      ),
-                      borderRadius: BorderRadius.circular(6),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.4),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                app.isFull
-                    ? 'All slots filled — no new testers accepted'
-                    : '${app.testersNeeded - app.testerCount} slot${(app.testersNeeded - app.testerCount) == 1 ? '' : 's'} remaining',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: app.isFull
-                      ? const Color(0xFFDC2626)
-                      : (isDark
-                            ? AppColors.textHintDark
-                            : AppColors.textHintLight),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Secondary stats row
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                icon: Icons.schedule_rounded,
-                iconColor: daysColor,
-                label: 'Days Left',
-                value: '${app.daysLeft}',
-                sublabel: daysUrgent ? 'Ending soon!' : 'Remaining',
-                isDark: isDark,
-                urgent: daysUrgent,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _StatCard(
-                icon: Icons.calendar_today_rounded,
-                iconColor: const Color(0xFF0891B2),
-                label: 'Listed On',
-                value: _formatDate(app.createdAt.toDate()),
-                sublabel: 'Posted date',
-                isDark: isDark,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  String _formatDate(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.value,
-    required this.sublabel,
-    required this.isDark,
-    this.urgent = false,
-  });
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final String value;
-  final String sublabel;
-  final bool isDark;
-  final bool urgent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: urgent
-            ? const Color(0xFFDC2626).withValues(alpha: isDark ? 0.12 : 0.06)
-            : (isDark ? AppColors.cardDark : Colors.white),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: urgent
-              ? const Color(0xFFDC2626).withValues(alpha: 0.3)
-              : (isDark ? AppColors.borderDark : AppColors.borderLight),
-        ),
-        boxShadow: urgent
-            ? null
-            : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: iconColor),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: isDark
-                      ? AppColors.textHintDark
-                      : AppColors.textHintLight,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              color: iconColor,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            sublabel,
-            style: TextStyle(
-              fontSize: 10,
-              color: isDark ? AppColors.textHintDark : AppColors.textHintLight,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Section wrapper ─────────────────────────────────────────────────────────
-
-class _Section extends StatelessWidget {
-  const _Section({
-    required this.icon,
-    required this.title,
-    required this.child,
-    required this.isDark,
-  });
-  final IconData icon;
-  final String title;
-  final Widget child;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, size: 14, color: Colors.white),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-                letterSpacing: -0.3,
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        child,
-      ],
     );
   }
 }
@@ -1029,276 +1244,25 @@ class _TestingInstructionsCardState extends State<_TestingInstructionsCard> {
   }
 }
 
-// ── App Info Grid ───────────────────────────────────────────────────────────
+// ── Swap Action Area (non-owner) ─────────────────────────────────────────────
 
-class _AppInfoGrid extends StatelessWidget {
-  const _AppInfoGrid({required this.app, required this.isDark});
-  final AppListing app;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = <_InfoItem>[
-      _InfoItem(
-        icon: Icons.category_outlined,
-        label: 'Category',
-        value: app.categoryLabel,
-      ),
-      if (app.latestVersion != null && app.latestVersion!.isNotEmpty)
-        _InfoItem(
-          icon: Icons.new_releases_outlined,
-          label: 'Version',
-          value: 'v${app.latestVersion}',
-        ),
-      if (app.minAndroidLevel != null && app.minAndroidLevel!.isNotEmpty)
-        _InfoItem(
-          icon: Icons.android_rounded,
-          label: 'Min Android',
-          value: 'Android ${app.minAndroidLevel}+',
-        ),
-      _InfoItem(
-        icon: Icons.schedule_rounded,
-        label: 'Testing Period',
-        value: '14 days',
-      ),
-    ];
-
-    if (items.isEmpty) return const SizedBox.shrink();
-
-    return _Section(
-      icon: Icons.info_outline_rounded,
-      title: 'App Details',
-      isDark: isDark,
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: items.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 2.4,
-        ),
-        itemBuilder: (_, i) => _InfoGridCell(item: items[i], isDark: isDark),
-      ),
-    );
-  }
-}
-
-class _InfoItem {
-  const _InfoItem({required this.icon, required this.label, required this.value});
-  final IconData icon;
-  final String label;
-  final String value;
-}
-
-class _InfoGridCell extends StatelessWidget {
-  const _InfoGridCell({required this.item, required this.isDark});
-  final _InfoItem item;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.cardDark : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.borderLight,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(item.icon, size: 15, color: AppColors.primary),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  item.label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isDark
-                        ? AppColors.textHintDark
-                        : AppColors.textHintLight,
-                  ),
-                ),
-                const SizedBox(height: 1),
-                Text(
-                  item.value,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? AppColors.textPrimaryDark
-                        : AppColors.textPrimaryLight,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Tags Section (Countries + Languages) ────────────────────────────────────
-
-class _TagsSection extends StatelessWidget {
-  const _TagsSection({required this.app, required this.isDark});
-  final AppListing app;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final hasCountries = app.targetCountries.isNotEmpty &&
-        !(app.targetCountries.length == 1 && app.targetCountries.first == 'All');
-    final hasLangs = app.appLanguages.isNotEmpty;
-    if (!hasCountries && !hasLangs) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (hasCountries) ...[
-          _TagGroup(
-            icon: Icons.public_rounded,
-            title: 'Target Countries',
-            tags: app.targetCountries,
-            isDark: isDark,
-            tagColor: const Color(0xFF0891B2),
-          ),
-        ],
-        if (hasCountries && hasLangs) const SizedBox(height: 14),
-        if (hasLangs)
-          _TagGroup(
-            icon: Icons.translate_rounded,
-            title: 'App Languages',
-            tags: app.appLanguages,
-            isDark: isDark,
-            tagColor: const Color(0xFF7C3AED),
-          ),
-      ],
-    );
-  }
-}
-
-class _TagGroup extends StatelessWidget {
-  const _TagGroup({
-    required this.icon,
-    required this.title,
-    required this.tags,
-    required this.isDark,
-    required this.tagColor,
-  });
-  final IconData icon;
-  final String title;
-  final List<String> tags;
-  final bool isDark;
-  final Color tagColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 15, color: tagColor),
-            const SizedBox(width: 7),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 7,
-          runSpacing: 7,
-          children: tags.map((t) => _Tag(label: t, color: tagColor, isDark: isDark)).toList(),
-        ),
-      ],
-    );
-  }
-}
-
-class _Tag extends StatelessWidget {
-  const _Tag({required this.label, required this.color, required this.isDark});
-  final String label;
-  final Color color;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.12 : 0.07),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: isDark ? color.withValues(alpha: 0.9) : color,
-        ),
-      ),
-    );
-  }
-}
-
-// ── Action Area ─────────────────────────────────────────────────────────────
-
-class _ActionArea extends StatelessWidget {
-  const _ActionArea({
+class _SwapActionArea extends StatelessWidget {
+  const _SwapActionArea({
     required this.app,
     required this.isDark,
-    required this.isOwner,
     required this.checking,
     required this.alreadyTesting,
   });
   final AppListing app;
   final bool isDark;
-  final bool isOwner;
   final bool checking;
   final bool alreadyTesting;
 
   @override
   Widget build(BuildContext context) {
-    if (isOwner) {
-      return _StatusBanner(
-        icon: Icons.verified_rounded,
-        label: 'This is your app',
-        sublabel: 'You posted this listing',
-        gradient: const [Color(0xFF4F46E5), Color(0xFF7C3AED)],
-      );
-    }
-
     if (checking) {
-      return const Center(
-        child: CircularProgressIndicator(strokeWidth: 2),
+      return Center(
+        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
       );
     }
 
@@ -1307,14 +1271,14 @@ class _ActionArea extends StatelessWidget {
         children: [
           _StatusBanner(
             icon: Icons.check_circle_rounded,
-            label: 'You\'re already testing',
-            sublabel: 'You\'re an active tester for this app',
+            label: "You're testing this app",
+            sublabel: "You're an active tester",
             gradient: const [Color(0xFF059669), Color(0xFF10B981)],
           ),
           const SizedBox(height: 14),
           _GradientButton(
             icon: Icons.download_rounded,
-            label: 'Install App Now',
+            label: 'Install App',
             gradient: const [Color(0xFF059669), Color(0xFF10B981)],
             onTap: () => Get.find<TestingController>().installApp(app.packageName),
           ),
@@ -1331,30 +1295,48 @@ class _ActionArea extends StatelessWidget {
       );
     }
 
-    final swapCtrl = Get.find<SwapController>();
-    final hasPendingSwap = swapCtrl.sentRequests
-        .any((r) => r.toAppId == app.id && r.status == SwapStatus.pending);
-
-    if (hasPendingSwap) {
-      return _StatusBanner(
-        icon: Icons.hourglass_top_rounded,
-        label: 'Swap Request Sent',
-        sublabel: 'Waiting for the developer\'s response',
-        gradient: const [Color(0xFFF59E0B), Color(0xFFF97316)],
+    final pendingReq = Get.find<SwapController>().pendingSentRequestTo(app.id);
+    if (pendingReq != null) {
+      return Column(
+        children: [
+          _StatusBanner(
+            icon: Icons.hourglass_top_rounded,
+            label: 'Swap Request Sent',
+            sublabel: 'Waiting for developer response',
+            gradient: const [Color(0xFFF59E0B), Color(0xFFF97316)],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => Get.find<SwapController>().cancelRequest(pendingReq),
+              icon: const Icon(Icons.cancel_outlined, size: 16),
+              label: const Text(
+                'Cancel Request',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFDC2626),
+                side: BorderSide(color: const Color(0xFFDC2626).withValues(alpha: 0.4)),
+                backgroundColor: const Color(0xFFDC2626).withValues(alpha: 0.05),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+              ),
+            ),
+          ),
+        ],
       );
     }
 
+    // Default: can request swap
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.primary.withValues(alpha: 0.08)
-                : const Color(0xFFEEF2FF),
+            color: isDark ? AppColors.primary.withValues(alpha: 0.08) : const Color(0xFFEEF2FF),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.2)),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
           ),
           child: Row(
             children: [
@@ -1362,20 +1344,18 @@ class _ActionArea extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Send a swap request to join testing. You\'ll test each other\'s apps.',
+                  'Send a swap request to join testing. Both devs test each other\'s apps.',
                   style: TextStyle(
                     fontSize: 12,
                     height: 1.5,
-                    color: isDark
-                        ? AppColors.textSecondaryDark
-                        : const Color(0xFF3730A3),
+                    color: isDark ? AppColors.textSecondaryDark : const Color(0xFF3730A3),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         _GradientButton(
           icon: Icons.swap_horiz_rounded,
           label: 'Request Swap to Join Testing',
@@ -1391,6 +1371,196 @@ class _ActionArea extends StatelessWidget {
     );
   }
 }
+
+// ── Owner Action Panel ──────────────────────────────────────────────────────
+class _OwnerActionPanel extends StatelessWidget {
+  const _OwnerActionPanel({required this.app, required this.isDark});
+  final AppListing app;
+  final bool isDark;
+
+  void _openEditSheet(BuildContext context) {
+    Get.find<AppsController>().fillFormForEdit(app);
+    Get.to(() => const AddAppView());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appsCtrl = Get.find<AppsController>();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ── Action row: Share + Edit Details ───────────────────────────
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => Share.share(
+                  'Check out ${app.appName} on Play Store!\nhttps://play.google.com/store/apps/details?id=${app.packageName}',
+                  subject: app.appName,
+                ),
+                icon: const Icon(Icons.share_rounded, size: 16),
+                label: const Text(
+                  'Share',
+                  style: TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF0891B2),
+                  side: BorderSide(
+                      color: const Color(0xFF0891B2)
+                          .withValues(alpha: 0.45)),
+                  backgroundColor:
+                      const Color(0xFF0891B2).withValues(alpha: 0.06),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  minimumSize: const Size(0, 46),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4F46E5)
+                          .withValues(alpha: 0.35),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _openEditSheet(context),
+                    borderRadius: BorderRadius.circular(12),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 13),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.edit_rounded,
+                              color: Colors.white, size: 16),
+                          SizedBox(width: 7),
+                          Text(
+                            'Edit Details',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        // ── Pause / Resume card ────────────────────────────────────────
+        Obx(() {
+          final latest =
+              appsCtrl.myApps.firstWhereOrNull((a) => a.id == app.id) ??
+                  app;
+          final isPaused = latest.paused;
+          final activeColor = isPaused
+              ? const Color(0xFFDC2626)
+              : const Color(0xFF059669);
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.cardDark : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                  color: activeColor.withValues(alpha: 0.30),
+                  width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: activeColor.withValues(alpha: 0.07),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: activeColor.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    isPaused
+                        ? Icons.pause_circle_rounded
+                        : Icons.play_circle_rounded,
+                    color: activeColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isPaused ? 'Listing Paused' : 'Listing Active',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: activeColor,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isPaused
+                            ? 'Hidden from browse — toggle to resume'
+                            : 'Visible to all testers in browse',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch.adaptive(
+                  value: !isPaused,
+                  onChanged: (_) => appsCtrl.togglePauseListing(latest),
+                  activeThumbColor: const Color(0xFF059669),
+                  activeTrackColor:
+                      const Color(0xFF059669).withValues(alpha: 0.30),
+                  inactiveThumbColor: const Color(0xFFDC2626),
+                  inactiveTrackColor:
+                      const Color(0xFFDC2626).withValues(alpha: 0.25),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+}
+
 
 class _StatusBanner extends StatelessWidget {
   const _StatusBanner({

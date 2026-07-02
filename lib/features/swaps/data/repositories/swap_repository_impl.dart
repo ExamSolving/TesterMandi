@@ -263,6 +263,11 @@ class SwapRepositoryImpl implements SwapRepository {
     await _col.doc(request.id).update({'status': 'denied'});
   }
 
+  @override
+  Future<void> cancelRequest(String requestId) async {
+    await _col.doc(requestId).delete();
+  }
+
   // ── Private: clean up reverse duplicate after accept ──────────────────────
 
   Future<void> _denyReversePendingRequests({

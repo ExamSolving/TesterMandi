@@ -56,6 +56,7 @@ class AppListing {
     this.latestVersion,
     this.minAndroidLevel,
     this.testingInstructions,
+    this.paused = false,
   });
 
   final String id;
@@ -75,6 +76,7 @@ class AppListing {
   final String? latestVersion;
   final String? minAndroidLevel;
   final String? testingInstructions;
+  final bool paused;
 
   int get testerCount => testerIds.length;
   bool get isFull => testerCount >= testersNeeded;

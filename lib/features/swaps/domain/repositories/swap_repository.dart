@@ -24,6 +24,7 @@ abstract class SwapRepository {
   });
 
   Future<void> denyRequest(SwapRequest request);
+  Future<void> cancelRequest(String requestId);
 
   /// True if sending a request from [fromAppId] → [toAppId] should be blocked.
   /// Checks: outgoing pending request, incoming pending request for the same
